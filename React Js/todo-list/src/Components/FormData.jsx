@@ -4,13 +4,13 @@ import Table from './Table'
 
 export default function FormData() {
 
-    const [formData, setFormData] = useState([1]);
+    const [formData, setFormData] = useState([]);
 
     return (
         <>
-            <Form/>
+            <Form formData={formData} setFormData={setFormData}/>
 
-            <Table formData={formData}/>
+            <Table formData={formData} setFormData={setFormData}/>
         </>
     )
 }

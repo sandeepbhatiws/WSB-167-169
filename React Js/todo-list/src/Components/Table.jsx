@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Table({formData}) {
+export default function Table({formData, setFormData}) {
     return (
         <>
             <div class="table-container">
@@ -21,9 +21,9 @@ export default function Table({formData}) {
                         {
                             formData.length > 0
                             ?
-                                formData.map(() => {
+                                formData.map((v,i) => {
                                     return(
-                                        <TableData/>
+                                        <TableData key={i} data={v} index={i} formData={formData} setFormData={setFormData}/>
                                     )
                                 })
                             :
@@ -40,16 +40,29 @@ export default function Table({formData}) {
 }
 
 
-const TableData = () => {
+const TableData = ({data, index, formData, setFormData}) => {
+
+    const deleteRecord = (index) => {
+        if(confirm('Are you sure you want to delete ?')){
+            const data = formData.filter((v,i) => {
+                if(index != i){
+                    return v;
+                }
+            }) 
+
+            setFormData([...data]);
+        }
+    }
+
     return(
         <tr>
-            <td>1</td>
-            <td>test</td>
-            <td>tes@gmail.com</td>
-            <td>123456789</td>
-            <td>India</td>
-            <td>India</td>
-            <td><button> Delete </button></td>
+            <td>{index+1 }</td>
+            <td>{data.name}</td>
+            <td>{data.email}</td>
+            <td>{data.mobile_number}</td>
+            <td>{data.country_name}</td>
+            <td>{data.state_name}</td>
+            <td><button onClick={ () => deleteRecord(index) }> Delete </button></td>
         </tr>
     )
 }

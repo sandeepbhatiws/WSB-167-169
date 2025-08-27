@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import states from '../states';
 
-export default function Form() {
+export default function Form({formData, setFormData}) {
 
     const [getStates, setGetStates] = useState([]);
 
@@ -16,11 +16,28 @@ export default function Form() {
         setGetStates([...finalStates]);
     }
 
+    const formHandler = (e) => {
+        e.preventDefault();
+
+        const user = {
+            name : e.target.name.value,
+            email : e.target.email.value,
+            mobile_number : e.target.mobile.value,
+            country_name : e.target.country.value,
+            state_name : e.target.state.value
+        }
+        setFormData([user, ...formData]);
+
+        e.target.reset();
+        setGetStates([]);
+
+    }
+
     return (
         <>
             <div class="form-container">
                 <h2>Basic Form</h2>
-                <form id="formHandler" autocomplete="off">
+                <form id="formHandler" onSubmit={ formHandler } autocomplete="off">
                     <div class="form-group">
                         <label for="name">Name</label>
                         <input type="text" id="name" name="name" required />
