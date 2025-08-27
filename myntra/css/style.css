@@ -1,0 +1,172 @@
+*{
+	padding: 0px;
+	margin: 0px;
+}
+a{
+	text-decoration: none;
+	color: black;
+}
+body{
+	font-family: "Roboto", sans-serif;
+}
+
+.main{
+	width: 100%;
+}
+.outer_header{
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 50px;
+	box-sizing: border-box;
+	box-shadow: 0px 2px 2px 0px whitesmoke;
+	background-color: white;
+	position: sticky;
+	top: 0px;
+}
+.header_menu ul{
+	display: flex;
+	list-style: none;
+	padding-top: 10px;
+}
+
+.header_menu ul li{
+	text-transform: uppercase;
+	font-weight: bold;
+	color: #282C3F;
+	padding: 15px 20px;
+	font-size: 12px;
+}
+
+.outer_search{
+	display: flex;
+	background: #F5F5F6;
+	padding: 10px 15px;
+/*	border: 1px solid gray;*/
+
+	box-shadow: 0px 0px 2px 1px gray;
+	flex-basis: 35%;
+	box-sizing: border-box;
+	border-radius: 5px;
+}
+
+.search_icon{
+	flex-basis: 7%;
+}
+.search_box{
+	flex-basis: 93%;
+}
+.search_box input{
+	width: 100%;
+	border: 0px;
+	background: #F5F5F6;
+}
+
+.header_right{
+	display: flex;
+	gap : 15px;
+	padding-right: 30px;
+}
+.logo img{
+	width: 55px;
+    padding-top: 15px;
+    padding-left: 10px;
+}
+
+.header_icon{
+	text-align: center;
+/*	padding: 10px;*/
+}
+.header_text{
+	font-size: 12px;
+	text-transform: capitalize;
+	font-weight: bold;
+	padding-top: 5px;
+}
+
+.outer_flat{
+	width: 100%;
+	padding: 15px 50px;
+	padding-top: 25px;
+	box-sizing: border-box;
+}
+.flat img{
+	width: 100%;
+}
+.outer_banner{
+	width: 100%;
+	padding: 0px 50px;
+	display: flex;
+	box-sizing: border-box;
+}
+.banner img {
+	width: 100%;
+}
+.banner_sponser{
+	flex-grow: 1;
+}
+
+
+.outer_footer{
+	width: 100%;
+	background: #FAFBFC;
+}
+.footer_menus{
+	max-width: 1320px;
+	margin: auto;
+	padding: 50px;
+	display: flex;
+	gap: 40px;
+}
+.online_shopping h2{
+	font-size: 14px;
+	padding-bottom: 20px;
+}
+.online_shopping ul{
+	list-style: none;
+	margin-bottom: 15px;
+	color: #777986;
+	font-size: 14px;
+}
+.online_shopping ul li{
+	padding: 5px 0px;
+}
+.popular_searches{
+	max-width: 1320px;
+	margin: auto;
+	padding: 50px;
+	display: flex;
+	align-items: center;
+}
+
+.popular_content{
+	padding-right: 15px;
+}
+
+.popular_border{
+/*	border: 2px solid #EAEAEC;*/
+/*	padding: 2px;*/
+
+	height: 2px;
+	background: #EAEAEC;
+	flex-grow: 1;
+}
+
+.instagram{
+	background: black;
+/*	width: 50px;*/
+	display: inline-block;
+	padding: 10px 13px;
+	border-radius: 50%;
+	position: fixed;
+	/*top: 600px;
+	left: 80px;*/
+
+	bottom: 30px;
+	right: 30px;
+}
+.whatsapp-icon{
+	color: white;
+	font-size: 40px;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Table</title>
+</head>
+<body>
+    <!-- Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quibusdam, totam necessitatibus est officia porro corporis omnis modi, incidunt iusto, cumque fuga a praesentium inventore! Iste nihil quisquam aperiam possimus eligendi! -->
+
+    <script>
+        from    =  prompt('Enter the from value');
+        to      =  prompt('Enter the to value');
+
+        for(i = from; i <= to; i++){
+            
+            for(j = 1; j <= 10; j++){
+                // document.write(i+' * '+ j +' = '+ (i*j) +' <br>');
+
+                document.write(`${ i } * ${ j } = ${ i*j } <br>`);
+            }
+
+            document.write('<hr>');
+        }
+
+        // var heading = 'sit amet consectetur';
+
+        // document.write(`Lorem ipsum dolor ${ heading },
+        //  adipisicing elit. Quibusdam, totam necessitatibus
+        //   est officia porro corporis omnis modi, incidunt iusto, cumque fuga a praesentium inventore! Iste nihil quisquam aperiam possimus eligendi!`);
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <title>Events</title>
+
+        <style>
+            .row{
+                width: 1200px;
+                margin: auto;
+                padding: 50px 0px;
+            }
+            .d-none{
+                display: none;
+            }
+
+            .outer_images{
+                width: 1200px;
+                margin: auto;
+                display: flex;
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="row">
+            <button onclick="showHide()">On Click</button>
+            <button ondblclick="showHide()">On Double Click</button>
+            <!-- <button onmousemove="mousemove()">On Mouse Move</button> -->
+             <button onmousewheel="mousemove()">On Mouse Wheel</button>
+
+             <!-- <input onkeyup="copyCut(this)"/> -->
+
+             <!-- <input onfocus="mousemove()" onblur="mousemove()"/> -->
+
+             <input onchange="mousemove(this)" />
+
+             <select onchange="mousemove(this)">
+                <option>HTMl</option>
+                <option>CSS</option>
+                <option>CSS 3</option>
+             </select>
+        </div>
+
+        <div class="row" id="row">
+            
+        </div>
+
+        <div class="outer_images">
+            <img src="1.png" id="image1" onmouseover="imageChange(1)" onmouseleave="imageChange(2)"/>
+            <img src="2.png" id="image2" onmouseenter="imageChange(1)" onmouseout="imageChange(2)"/>
+        </div>
+
+
+        <script src="custom.js"></script>
+    </body>
+</html>

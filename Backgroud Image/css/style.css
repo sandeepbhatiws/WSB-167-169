@@ -1,0 +1,25 @@
+.row1{
+	background-image: url('../images/1.jpg');
+	width: 1000px;
+	height: 600px;
+	border: 1px solid black;
+	background-position: top center;
+	background-size: cover;
+	background-size: contain;
+	background-size: 100% 100%;
+	background-attachment: fixed;
+}
+
+.row2{
+	margin-top: 50px;
+	background-image: url('../images/3.jpg');
+	width: 1000px;
+	height: 600px;
+	border: 1px solid black;
+	background-repeat: repeat-x;
+	background-repeat: no-repeat;
+	background-position: right center;
+	background-position: bottom center;
+	background-size: cover;
+	background-size: contain;
+}

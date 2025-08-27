@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Smallest Elements</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+<body>
+    
+
+
+    <script>
+        var numbers = [5,10,15,20,25,30,2,26,22,15,21];
+        smallest = numbers[0];  // 5 2
+
+        document.write(numbers);
+
+        for(index in numbers){
+            console.log('smallest = '+ smallest);
+            if(numbers[index] < smallest){
+                smallest = numbers[index];
+                console.log(numbers[index]);
+            }
+        }
+
+        document.write('<br>smallest value - '+smallest);
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+<body>
+    
+
+    <script>
+        var from = prompt('Enter the from value (eg - k, c, f)');
+        from = from.toLowerCase();
+
+        var to = prompt('Enter the to value (eg - k, c, f)');
+        to = to.toLowerCase();
+
+        var input = prompt('Enter the number');
+        input = parseInt(input);
+
+
+        if(from == 'c' && to == 'f'){
+            var output = (input * 9/5) + 32
+            document.write(output);
+        } else if(from == 'k' && to == 'f'){
+            var output = (input - 273.15) * 9/5 + 32;
+            document.write(output);
+        } else {
+            document.write('Invalid Value');
+        }
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+*{
+	padding: 0px;
+	margin: 0px;
+}
+
+body{
+	font-family: "Inter", sans-serif;
+}
+
+.row{
+	max-width: 1200px;
+	margin: auto;
+	display: flex;
+	border: 0px solid red;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.column{
+	margin: 1%;
+	flex-basis: 31%;
+	border: 1px solid black;
+	padding: 15px;
+	box-sizing: border-box;
+	border-radius: 10px;
+}

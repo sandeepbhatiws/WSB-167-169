@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Return Statement Functions</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+<body>
+    
+    <button onclick="addition(20,10)" >Addition</button>
+    <button onclick="subtract(20,10)" >Subtraction</button>
+    <button onclick="multiple(20,10)" >Multiple</button>
+
+    <script>
+        var a = 15;
+        var b = 10;
+        var c = 10;
+
+        // Function Declare
+        function addition(x,y){
+            c = x+y;
+            // console.log(c);
+            return c;
+        }
+
+
+        // Function Declare
+        function multiple(a,b){
+            output = a*b;
+            return output;
+            // console.log(c);
+        }
+
+        function calculation(a, b, c){
+            x = multiple(b,c);
+            x = addition(x,a);
+            console.log(x);
+        }
+
+        // Function Call
+        calculation(a,b,c);
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+.outer{
+	background: black;
+	width: 100%;
+}
+.header{
+	max-width: 1400px;
+	margin: auto;
+	background: red;
+	padding: 16px;
+	display: flex;
+}
+.column{
+	background: black;
+	padding: 16px;
+	color: white;
+	margin: 16px;
+}
+.header-menu{
+	background: #E21D24;
+}
+.card-image{
+	width: 100px !important;
+}

@@ -1,0 +1,96 @@
+*{
+	padding: 0px;
+	margin: 0px;
+}
+a{
+	text-decoration: none;
+	color: black;
+}
+
+body{
+	font-family: sans-serif;
+}
+
+.outer{
+/*	width: 100%;
+	background: black;*/
+/*	height: 200px;*/
+}
+/*.row{
+	max-width: 1320px;
+	padding: 50px;
+	box-sizing: border-box;
+	text-align: center;
+	background: red;
+	font-size: 32px;
+	margin: auto;
+	color: white;
+}
+
+.row2{
+	min-width: 1320px;
+	padding: 50px;
+	box-sizing: border-box;
+	text-align: center;
+	background: red;
+	font-size: 32px;
+	margin: auto;
+	margin-top: 50px;
+	color: white;
+}*/
+
+.outer_wscubetech{
+	width: 100%;
+	background-image: url('../images/spotlight-bg.webp');
+	padding: 50px 0px 100px 0px;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: bottom;
+}
+.wscubetech_heading{
+	max-width: 1320px;
+	margin: auto;
+	text-align: center;
+	color: white;
+	padding: 50px;
+	box-sizing: border-box;
+}
+.wscubetech_heading h1{
+	font-size: 40px;
+	background-image: url('../images/spotlight-heading-bg.svg');
+	background-repeat: no-repeat;
+	background-position: right bottom;
+	display: inline-block;
+	padding-bottom: 0px;
+	padding-right: 20px;
+}
+.wscubetech_heading p{
+	padding-top: 10px;
+	font-size: 18px;
+}
+
+.wscubetech_numbers{
+	max-width: 1320px;
+	margin: auto;
+	color: white;
+	display: flex;
+/*	justify-content: space-between;*/
+	text-align: center;
+	padding: 0px 50px;
+	box-sizing: border-box;
+}
+.numbers{
+	width: 23%;
+	margin: 1%;
+}
+.numbers h2{
+	font-size: 40px;
+	padding-bottom: 20px;
+}
+
+.numbers p{
+	color: #9CB2C5;
+}
+.number_border{
+	border-left: 1px solid white;
+}

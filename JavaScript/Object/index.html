@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Object</title>
+</head>
+<body>
+    
+
+
+    <script>
+        var a = 5;
+        var a = ['Hello', 45];
+
+        var userInfo = {
+            email : 'user@gmail.com',
+            name : 'User name',
+            mobile : 978451230
+        }
+
+
+        // console.log(userInfo.name);
+        // console.log(userInfo.mobile);
+
+        var userInfos = [
+            {
+                name : 'User 1',
+                email : 'user1@gmail.com',
+                mobile_number : 9784512036
+            },
+            {
+                name : 'User 2',
+                email : 'user2@gmail.com',
+                mobile_number : 9784512036
+            },
+            {
+                name : 'User 3',
+                email : 'user3@gmail.com',
+                mobile_number : 9784512036
+            }
+        ]
+
+
+        var info = {
+            name : "Info",
+            email : 'info@gmail.com',
+            mobile_number : 1234547890
+        }
+
+    // userInfos.push(info)   // add the value in the last
+    // userInfos.unshift(info)    // add the value in the first
+
+        // Spread Operator
+        var userInfos = [...userInfos, info];
+
+        userInfos.forEach((value, index) => {
+            console.log(index);
+            console.log(value);
+
+            console.log(userInfos[index].name)
+            console.log(value.email)
+        })
+
+
+        var name = 'HelloWorld';
+        var newName = [...name];
+
+        console.log(newName);
+
+
+    </script>
+</body>
+</html>

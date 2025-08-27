@@ -1,0 +1,29 @@
+@media only screen and (min-width:769px) and (max-width:1024px){
+
+}
+
+@media only screen and (min-width:427px) and (max-width:768px){
+	.column{
+		flex-basis: 48%;
+	}
+}
+
+@media only screen and (min-width:377px) and (max-width:426px){
+	.column{
+		flex-basis: 98%;
+	}
+}
+
+@media only screen and (max-width:376px){
+	.row{
+		flex-direction: column;
+	}
+}
+
+/*@media only screen and (min-width:0px) and (max-width:320px){
+
+}*/
+
+/*@media only screen and (max-width:320px){
+
+}*/
