@@ -3,9 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Product from './Product';
 
-export default function BestSelling() {
-
-    const [getProducts, setGetProdoucts] = useState([1, 2, 3, 4, 5, 6]);
+export default function BestSelling({ productData }) {
 
     return (
         <>
@@ -18,9 +16,9 @@ export default function BestSelling() {
                     </div>
                     <div className='row row-gap-3'>
                         {
-                            getProducts.map(() => {
+                            productData.map((v,i) => {
                                 return (
-                                    <Product type="2"/>
+                                    <Product type="2" key={i} data={v}/>
                                 )
                             })
                         }

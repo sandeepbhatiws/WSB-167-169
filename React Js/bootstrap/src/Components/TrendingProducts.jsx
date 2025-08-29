@@ -3,9 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Product from './Product';
 
-export default function TrendingProducts() {
-
-    const [getProducts, setGetProdoucts] = useState([1,2,3,4,5,6,7,8]);
+export default function TrendingProducts({ productData }) {
 
     return (
         <>
@@ -18,9 +16,9 @@ export default function TrendingProducts() {
                     </div>
                     <div className='row row-gap-3'>
                         {
-                            getProducts.map(() => {
+                            productData.map((v,i) => {
                                 return(
-                                    <Product type="1"/>
+                                    <Product type="1" key={i} data={v}/>
                                 )
                             })
                         }
