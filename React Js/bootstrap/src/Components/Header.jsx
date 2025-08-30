@@ -3,10 +3,12 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import { ToastContainer } from 'react-toastify';
 
 export default function Header() {
     return (
         <>
+            <ToastContainer/>
             <header className='container-fluid bg-black'>
                 <div className='container'>
                     <div className='row'>

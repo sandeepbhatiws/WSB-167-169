@@ -9,7 +9,7 @@ export default function HomePage() {
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
-        axios.get('https://dummyjson.com/products?limit=12')
+        axios.get('https://wscubetech.co/ecommerce-api/products.php?limit=12')
             .then((result) => {
                 setProducts(result.data.products);
             })
