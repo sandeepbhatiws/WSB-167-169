@@ -3,6 +3,7 @@ import Header from './Header'
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Product from './Product';
+import ProductPlaceHolder from './ProductPlaceHolder';
 
 export default function ProductListing() {
 
@@ -12,6 +13,8 @@ export default function ProductListing() {
     const [priceFrom, setPriceFrom] = useState('');
     const [priceTo, setPriceTo] = useState('');
     const [sorting, setSorting] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    var [currentPage, setCurrentpage] = useState(1);
 
     useEffect(() => {
         axios.get('https://wscubetech.co/ecommerce-api/categories.php')
@@ -26,7 +29,7 @@ export default function ProductListing() {
     useEffect(() => {
         axios.get('https://wscubetech.co/ecommerce-api/products.php', {
             params: {
-                page: 1,
+                page: currentPage,
                 limit: 12,
                 categories: filterCategories.toString(),
                 price_from: priceFrom,
@@ -36,14 +39,15 @@ export default function ProductListing() {
         })
             .then((result) => {
                 setProducts(result.data.data)
+                setIsLoading(false)
             })
             .catch(() => {
                 toast.error('Something went wrong !')
             })
-    }, [filterCategories, priceFrom, sorting]);
+    }, [filterCategories, priceFrom, sorting, currentPage]);
 
     const filterCategry = (slug) => {
-
+        setIsLoading(true)
         if (filterCategories.includes(slug)) {
 
             var data = filterCategories.filter((v) => {
@@ -61,12 +65,27 @@ export default function ProductListing() {
     }
 
     const priceFilter = (from, to) => {
+        setIsLoading(true)
         setPriceFrom(from)
         setPriceTo(to)
     }
 
     const filterSorting = (value) => {
+        setIsLoading(true)
         setSorting(value);
+    }
+
+    const pagination = (type) => {
+        setIsLoading(true)
+        if(type == 'plus'){
+            currentPage++
+            setCurrentpage(currentPage)
+        } else {
+            if(currentPage > 1){
+                currentPage--
+                setCurrentpage(currentPage)
+            }
+        }
     }
 
     return (
@@ -227,8 +246,27 @@ export default function ProductListing() {
                                             </div>
                                         </div>
                                         <div class="row row-gap-3">
-
                                             {
+                                                isLoading
+                                                ?
+                                                <>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                    <ProductPlaceHolder type="2"/>
+                                                </>
+                                                :
                                                 products.length > 1
                                                     ?
                                                     products.map((v, i) => {
@@ -240,16 +278,20 @@ export default function ProductListing() {
                                                     "No Record Found !!"
                                             }
 
-                                            {
+                                        </div>
 
-                                            }
-
-
-
-
+                                        <div className='row mt-3 justify-content-center'>
+                                            <div className='col-1'>
+                                                <button className='btn btn-primary' onClick={ () => pagination('minus')}  disabled={ currentPage == 1 ? 'disabled' : '' } >Previous</button>
+                                            </div>
+                                            <div className='col-1 ms-3'>
+                                                <button className='btn btn-primary' onClick={ () => pagination('plus')}>Next</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                
                             </div>
                         </div>
                     </div>
