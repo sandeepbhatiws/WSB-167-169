@@ -3,6 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import { Link } from 'react-router';
 import { ToastContainer } from 'react-toastify';
 
 export default function Header() {
@@ -14,14 +15,17 @@ export default function Header() {
                     <div className='row'>
                         <Navbar collapseOnSelect expand="lg">
                             <Container>
-                                <Navbar.Brand href="#home">
-                                    <img src='https://www.wscubetech.com/images/ws-cube-white-logo.svg'/>
+                                <Navbar.Brand>
+                                    <Link to="/">
+                                        <img src='https://www.wscubetech.com/images/ws-cube-white-logo.svg'/>
+                                    </Link>
                                 </Navbar.Brand>
                                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                                 <Navbar.Collapse id="responsive-navbar-nav">
                                     <Nav className="me-auto">
-                                        <Nav.Link href="#features" className='text-white'>Features</Nav.Link>
-                                        <Nav.Link href="#pricing" className='text-white'>Pricing</Nav.Link>
+                                        <Link to="product-listings" className='text-white p-3'>Product Listings</Link>
+                                            <Link to="about-us" className='text-white p-3  text-decoration-none'>About Us</Link>
+                                        
                                         <NavDropdown title="Dropdowns" id="collapsible-nav-dropdown" className='text-white'>
                                             <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
                                             <NavDropdown.Item href="#action/3.2">

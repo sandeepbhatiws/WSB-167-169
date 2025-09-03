@@ -4,8 +4,13 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import Product from './Product';
 import ProductPlaceHolder from './ProductPlaceHolder';
+import { useParams } from 'react-router';
 
 export default function ProductListing() {
+
+    const params = useParams();
+
+    console.log(params);
 
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
@@ -90,7 +95,6 @@ export default function ProductListing() {
 
     return (
         <>
-            <Header />
 
             <div className='container-fluid'>
                 <div className='container'>
@@ -290,8 +294,6 @@ export default function ProductListing() {
                                         </div>
                                     </div>
                                 </div>
-
-                                
                             </div>
                         </div>
                     </div>

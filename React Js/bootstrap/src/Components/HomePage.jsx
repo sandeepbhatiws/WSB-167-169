@@ -11,7 +11,7 @@ export default function HomePage() {
     useEffect(() => {
         axios.get('https://wscubetech.co/ecommerce-api/products.php?limit=12')
             .then((result) => {
-                setProducts(result.data.products);
+                setProducts(result.data.data);
             })
             .catch(() => {
 
@@ -20,7 +20,6 @@ export default function HomePage() {
 
     return (
         <>
-            <Header />
             <BestSelling productData={products} />
             <TrendingProducts productData={products} />
         </>
