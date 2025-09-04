@@ -23,6 +23,18 @@ createRoot(document.getElementById('root')).render(
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/product-listings/details/:id?" element={<ProductDetails/> } />
         </Route>
+
+        <Route path='admin-panel'>
+          <Route path='category'>
+            <Route path="add" element={<HomePage />} />
+            <Route path="view" element={<HomePage />} />
+          </Route>
+          
+
+          <Route path="products/add" element={<HomePage />} />
+          <Route path="products/view" element={<HomePage />} />
+        </Route>
+
         
       </Routes>
     </BrowserRouter>
