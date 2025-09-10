@@ -18,6 +18,7 @@ export default function HomePage() {
             })
     }, []);
 
+
     return (
         <>
             <BestSelling productData={products} />

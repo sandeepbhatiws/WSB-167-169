@@ -3,7 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Product from './Product';
 
-export default function BestSelling({ productData }) {
+export default function BestSelling({ productData }) {    
 
     return (
         <>

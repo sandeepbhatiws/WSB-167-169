@@ -10,7 +10,7 @@ export default function ProductListing() {
 
     const params = useParams();
 
-    console.log(params);
+    // console.log(params);
 
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);

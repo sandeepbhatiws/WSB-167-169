@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import AboutUs from './Components/AboutUs';
 import RootLayout from './Components/RootLayout';
 import ProductDetails from './Components/ProductDetails';
+import ViewCart from './Components/ViewCart';
 
 createRoot(document.getElementById('root')).render(
   <>
@@ -22,6 +23,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/product-listings/:slug?/:slug2?/:slug3?" element={<ProductListing />} />
           <Route path="/about-us" element={<AboutUs />} />
           <Route path="/product-listings/details/:id?" element={<ProductDetails/> } />
+          <Route path="/view-cart" element={<ViewCart />} />
         </Route>
 
         <Route path='admin-panel'>
