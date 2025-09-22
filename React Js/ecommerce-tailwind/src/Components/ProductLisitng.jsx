@@ -99,21 +99,28 @@ export default function ProductLisitng() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [sorting, setSorting] = useState('');
+    const [filterCategories, setFilterCategories] = useState([]);
+    const [filterBrands, setFilterBrands] = useState([]);
+    const [priceFrom, setPriceFrom] = useState('');
+    const [priceTo, setPriceTo] = useState('');
+    const [rating, setRating] = useState('');
+    const [searchName, setSearchName] = useState('');
 
     useEffect(() => {
         axios.get('https://wscubetech.co/ecommerce-api/products.php',{
             params : {
                 page : currentPage,
                 limit : 21,
-                sorting : '',
+                sorting : sorting,
                 price_from : '',
                 price_to : '',
                 discount_from : '',
                 discount_to : '',
-                name : '',
-                rating : '',
-                brands : '',
-                categories : '',
+                name : searchName,
+                rating : rating,
+                brands : filterBrands.toString(),
+                categories : filterCategories.toString(),
             }
         })
         .then((result) => {
@@ -123,7 +130,55 @@ export default function ProductLisitng() {
         .catch(() => {
             toast.error('Something went wrong');
         })
-    },[currentPage]);
+    },[currentPage, sorting, filterBrands, filterCategories, rating, searchName]);
+
+    const filterCategory = (slug) => {
+        if (filterCategories.includes(slug)) {
+            var data = filterCategories.filter((v) => {
+                if (v != slug) {
+                    return v;
+                }
+            })
+
+            setFilterCategories([...data]);
+
+        } else {
+            var data = [...filterCategories, slug];
+            setFilterCategories(data);
+        }
+        setCurrentPage(1);
+    }
+
+    const filterBrand = (slug) => {
+        if (filterBrands.includes(slug)) {
+            var data = filterBrands.filter((v) => {
+                if (v != slug) {
+                    return v;
+                }
+            })
+
+            setFilterBrands([...data]);
+
+        } else {
+            var data = [...filterBrands, slug];
+            setFilterBrands(data);
+        }
+        setCurrentPage(1);
+    }
+    const filterSorting = (value) => {
+        setSorting(value);
+        setCurrentPage(1);
+    }
+
+    const filterRating = (rate) => {
+        setRating(rate);
+        setCurrentPage(1);
+    }
+
+    const getInputValue = (event) => {
+        setSearchName(event.target.value);
+        setCurrentPage(1);
+    }
 
     return (
         <div className="bg-white">
@@ -234,13 +289,15 @@ export default function ProductLisitng() {
                                     />
                                 </MenuButton>
 
+                                <input onKeyUp={ getInputValue }/>
+
                                 <MenuItems
                                     transition
                                     className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                                 >
                                     <div className="py-1">
                                         {sortOptions.map((option) => (
-                                            <MenuItem key={option.name}>
+                                            <MenuItem key={option.name} onClick={ () => filterSorting(option.value) } >
                                                 <a
                                                     href={option.href}
                                                     className={classNames(
@@ -300,6 +357,7 @@ export default function ProductLisitng() {
                                                             <input
                                                                 id={option.slug}
                                                                 type="checkbox"
+                                                                onClick={() => filterCategory(option.slug)}
                                                                 className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                             />
                                                             <svg
@@ -354,6 +412,7 @@ export default function ProductLisitng() {
                                                             <input
                                                                 id={option.slug}
                                                                 type="checkbox"
+                                                                onClick={() => filterBrand(option.slug)}
                                                                 className="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                                                             />
                                                             <svg
@@ -535,6 +594,7 @@ export default function ProductLisitng() {
                                             <div class="flex items-center gap-x-3">
                                                 <input 
                                                 id="1" 
+                                                onClick={ () => filterRating(1) }
                                                 type="radio" 
                                                 name="push-notifications"
                                                 class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden" />
@@ -547,6 +607,7 @@ export default function ProductLisitng() {
                                             <div class="flex items-center gap-x-3">
                                                 <input 
                                                 id="2" 
+                                                onClick={ () => filterRating(2) }
                                                 type="radio" 
                                                 name="push-notifications"
                                                 class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden" />
@@ -556,6 +617,7 @@ export default function ProductLisitng() {
                                             <div class="flex items-center gap-x-3">
                                                 <input 
                                                 id="3" 
+                                                onClick={ () => filterRating(3) }
                                                 type="radio" 
                                                 name="push-notifications"
                                                 class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden" />
@@ -565,6 +627,7 @@ export default function ProductLisitng() {
                                             <div class="flex items-center gap-x-3">
                                                 <input 
                                                 id="4" 
+                                                onClick={ () => filterRating(4) }
                                                 type="radio" 
                                                 name="push-notifications"
                                                 class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden" />
@@ -574,6 +637,7 @@ export default function ProductLisitng() {
                                             <div class="flex items-center gap-x-3">
                                                 <input 
                                                 id="5" 
+                                                onClick={ () => filterRating(5) }
                                                 type="radio" 
                                                 name="push-notifications"
                                                 class="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden" />

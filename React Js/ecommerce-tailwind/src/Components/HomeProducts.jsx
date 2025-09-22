@@ -1,7 +1,7 @@
 import React from 'react'
 import ProductCard from './ProductCard'
 
-export default function HomeProducts({ title, description }) {
+export default function HomeProducts({ title, description, products }) {
     return (
         <>
             {/* <!-- title --> */}
@@ -13,10 +13,13 @@ export default function HomeProducts({ title, description }) {
             {/* <!-- ✅ Grid Section - Starts Here 👇 --> */}
             <section class="w-fit mx-auto grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 justify-items-center justify-center gap-y-20 gap-x-14 mt-10 mb-5">
 
-                <ProductCard/>
-                <ProductCard/>
-                <ProductCard/>
-                <ProductCard/>
+                {
+                    products.map((item,index) => {
+                        return(
+                            <ProductCard key={index} data={item} />
+                        )   
+                    })
+                }
 
             </section>
 
