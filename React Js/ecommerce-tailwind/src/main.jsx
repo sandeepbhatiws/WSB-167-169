@@ -6,19 +6,24 @@ import Home from "./Components/Home";
 import RootElements from "./Components/RootElements";
 import About from "./Components/About";
 import ProductLisitng from "./Components/ProductLisitng";
+import { Provider } from "react-redux";
+import { store } from "./ReduxToolkit/reduxToolkit";
 
 const root = document.getElementById("root");
 
 ReactDOM.createRoot(root).render(
+
   <BrowserRouter>
-    <Routes>
-        
-        <Route element={ <RootElements/> }>
-            <Route path="/" element={ <Home/> } />
-            <Route path="about-us" element={ <About/> } />
-            <Route path="products" element={ <ProductLisitng/> } />
+    <Provider store={store}>
+      <Routes>
+
+        <Route element={<RootElements />}>
+          <Route path="/" element={<Home />} />
+          <Route path="about-us" element={<About />} />
+          <Route path="products" element={<ProductLisitng />} />
         </Route>
 
-    </Routes>
-  </BrowserRouter>,
+      </Routes>
+    </Provider>
+  </BrowserRouter>
 );
