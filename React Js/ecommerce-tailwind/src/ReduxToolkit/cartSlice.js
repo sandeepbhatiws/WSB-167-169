@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { toast } from 'react-toastify';
 
 var cartData = localStorage.getItem('cartItems');
 var cartData = JSON.parse(cartData);
@@ -11,23 +12,71 @@ export const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    // increment: (state) => {
-    //   // Redux Toolkit allows us to write "mutating" logic in reducers. It
-    //   // doesn't actually mutate the state because it uses the Immer library,
-    //   // which detects changes to a "draft state" and produces a brand new
-    //   // immutable state based off those changes
-    //   state.value += 1
-    // },
-    // decrement: (state) => {
-    //   state.value -= 1
-    // },
-    // incrementByAmount: (state, action) => {
-    //   state.value += action.payload
-    // },
+    addToCart: (state, action) => {
+
+      const checkCart = state.cartItems.filter((v) => {
+        if (v.id == action.payload.id) {
+          return v;
+        }
+      })
+
+      if (checkCart.length > 0) {
+
+        const newCartItems = state.cartItems.map((v) => {
+          if(v.id == action.payload.id){
+            if(v.quantity < 5){
+              v.quantity++;
+              toast.success('Update Cart Succussfully!')
+              return v;
+            } else {
+              toast.error('Maximum limit reached !')
+              return v;
+            }
+            
+          } else {
+            return v;
+          }
+        })
+
+        localStorage.setItem('cartItems', JSON.stringify([...newCartItems]))
+
+        state.cartItems = [...newCartItems];
+
+        
+      } else {
+        const cartProduct = {
+          description : action.payload.description,
+          id : action.payload.id,
+          image : action.payload.image,
+          name : action.payload.name,
+          price : action.payload.price,
+          quantity : 1
+        }
+
+        localStorage.setItem('cartItems', JSON.stringify([cartProduct, ...state.cartItems]))
+
+        state.cartItems = [cartProduct, ...state.cartItems];
+
+        toast.success('Add to Cart Succussfully!')
+      }
+    },
+    removeCart : (state, action) => {
+      if(confirm('Are you sure you want to remove ?')){
+        const filterCart = state.cartItems.filter((v) => {
+          if (v.id != action.payload) {
+            return v;
+          }
+        })
+
+        localStorage.setItem('cartItems', JSON.stringify([...filterCart]));
+        state.cartItems = [...filterCart];
+        toast.success('Remove cart succussfully !');
+      }
+    }
   },
 })
 
 // Action creators are generated for each case reducer function
-export const { } = cartSlice.actions
+export const { addToCart, removeCart } = cartSlice.actions
 
 export default cartSlice.reducer
