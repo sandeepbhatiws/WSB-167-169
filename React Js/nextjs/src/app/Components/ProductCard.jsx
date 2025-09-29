@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { addToCart } from '../ReduxToolkit/cartSlice';
+import Link from 'next/link';
 
 export default function ProductCard({ data }) {
 
@@ -9,8 +10,9 @@ export default function ProductCard({ data }) {
   return (
     <>
       <div class="w-72 bg-white shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl">
-    <a href="#">
+    <Link href={`/products/${ data.category_slug }/${ data.id }`}>
       <img src={data.image} alt="Product" class="h-80 w-72 object-cover rounded-t-xl" />
+    </Link>
       <div class="px-4 py-3 w-72">
         <span class="text-gray-400 mr-3 uppercase text-xs">Brand :  
           { data.brand_name ? data.brand_name : 'N/A' }
@@ -28,7 +30,7 @@ export default function ProductCard({ data }) {
             </svg></div>
         </div>
       </div>
-    </a>
+    
   </div>
     </>
   )

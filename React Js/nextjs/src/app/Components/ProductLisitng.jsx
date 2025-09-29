@@ -75,7 +75,6 @@ function classNames(...classes) {
 export default function ProductLisitng() {
 
     const params = useParams();
-    console.log(params);
 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
@@ -114,6 +113,12 @@ export default function ProductLisitng() {
     const [searchName, setSearchName] = useState('');
 
     useEffect(() => {
+        if(params.category != undefined){
+            setFilterCategories(params.category[0] ? [params.category[0]] : []);
+        }
+    },[params]);
+
+    useEffect(() => {
         axios.get('https://wscubetech.co/ecommerce-api/products.php',{
             params : {
                 page : currentPage,
@@ -126,7 +131,7 @@ export default function ProductLisitng() {
                 name : searchName,
                 rating : rating,
                 brands : filterBrands.toString(),
-                categories : filterCategories.toString(),
+                categories : (params.category != undefined) ? params.category[0] : filterCategories.toString(),
             }
         })
         .then((result) => {
@@ -136,7 +141,7 @@ export default function ProductLisitng() {
         .catch(() => {
             toast.error('Something went wrong');
         })
-    },[currentPage, sorting, filterBrands, filterCategories, rating, searchName]);
+    },[currentPage, sorting, filterBrands, filterCategories, rating, searchName, params]);
 
     const filterCategory = (slug) => {
         if (filterCategories.includes(slug)) {
