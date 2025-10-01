@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
+import Cookies from 'js-cookie';
 
-var userLogin = localStorage.getItem('userLogin');
+var userLogin = Cookies.get('userLogin');
 
 const initialState = {
   value: userLogin ?? 0,
@@ -12,11 +13,11 @@ export const loginSlice = createSlice({
   reducers: {
     login: (state) => {
       state.value = 1
-      localStorage.setItem('userLogin',1)
+      Cookies.set('userLogin',1)
     },
     logout: (state) => {
       state.value = 0
-      localStorage.setItem('userLogin',0)
+      Cookies.set('userLogin',0)
     },
     // incrementByAmount: (state, action) => {
     //   state.value += action.payload
