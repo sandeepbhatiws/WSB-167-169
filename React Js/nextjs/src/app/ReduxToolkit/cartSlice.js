@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { toast } from 'react-toastify';
 
-var cartData = localStorage.getItem('cartItems');
-var cartData = JSON.parse(cartData);
+// var cartData = localStorage.getItem('cartItems');
+var cartData = [];
 
 const initialState = {
   cartItems: cartData ?? [],
