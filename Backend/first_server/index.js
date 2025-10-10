@@ -1,12 +1,16 @@
 const express = require('express');
 const { properties, productDetails } = require('./data');
 const server = express();  // To make it Exucutable Function
+const validation = require('./midelware.js');
+
+const route = express.Router();
+route.use(validation);
 
 server.get('/', (request, response) => {
     response.send('Server is working !!');
 });
 
-server.post('/api/properties', (request,response) => {
+server.get('/api/properties', validation , (request,response) => {
 
     if(properties.length > 0){
         const data = {
@@ -28,7 +32,7 @@ server.post('/api/properties', (request,response) => {
 
 });
 
-server.post('/api/product-details', (request,response) => {
+route.get('/api/product-details', (request,response) => {
 
     if(productDetails != ''){
         const data = {
@@ -50,6 +54,7 @@ server.post('/api/product-details', (request,response) => {
 
 });
 
+server.use('/', route);
 
 server.listen(5000, () => {
     console.log('Server is working fine !!')
