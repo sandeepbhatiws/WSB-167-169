@@ -20,7 +20,13 @@ server.get('/', (request, response) => {
     response.send('Server is working fine !!');
 });
 
-mongoose.connect(`mongodb+srv://${process.env.user_name}:${process.env.password}@cluster0.ieszaya.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`)
+// server.use('/uploads/users', express.static('uploads/users'));
+
+// Admin API URls
+require('./src/routes/admin/default.routes.js')(server);
+
+
+mongoose.connect(`mongodb+srv://${process.env.user_name}:${process.env.password}@sandeep.ktfb1.mongodb.net/${process.env.db_name}?appName=sandeep`)
 .then(() => console.log('Connected!'))
 .catch((error) => {
     console.log(error);
