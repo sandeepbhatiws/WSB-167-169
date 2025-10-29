@@ -20,7 +20,7 @@ server.get('/', (request, response) => {
     response.send('Server is working fine !!');
 });
 
-// server.use('/uploads/users', express.static('uploads/users'));
+server.use('/uploads/default', express.static('uploads/default'));
 
 // Admin API URls
 require('./src/routes/admin/default.routes.js')(server);

@@ -13,6 +13,9 @@ const defaultSchema = new mongoose.Schema({
             message: props => `The specified data is already in use.`
         }
     },
+    image : {
+        type : String,
+    },
     status : {
         type : Boolean,
         default : 1
