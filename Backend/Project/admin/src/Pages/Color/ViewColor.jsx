@@ -7,26 +7,92 @@ import { FaFilter } from 'react-icons/fa';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 // import { MdModeEditOutline } from "react-icons/md";
+import ResponsivePagination from 'react-responsive-pagination';
+import 'react-responsive-pagination/themes/classic-light-dark.css';
 
 export default function ViewCategory() {
 
   let [activeFilter, setactiveFilter] = useState(true);
   const [colors, setColors] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchName, setSearchName] = useState('');
+  const [searchCode, setSearchCode] = useState('');
+  const [checkBoxValues, setCheckBoxValues] = useState([]);
 
   useEffect(() => {
-    axios.post('http://localhost:5000/api/admin/color/view')
+    axios.post('http://localhost:5000/api/admin/color/view',{
+      page : currentPage,
+      name : searchName,
+      code : searchCode
+    })
     .then((result) => {
       if(result.data._status == true){
         setColors(result.data._data)
+        setTotalPages(result.data._paginate.total_pages)
       } else {
         setColors([]);
+        setTotalPages(1);
       }
     })
     .catch(() => {
       toast.error('Something went wrong !!');
     })
-  },[]);
+  },[currentPage, searchName, searchCode]);
 
+  const searchHandler = (event) => {
+    event.preventDefault();
+    setCurrentPage(1);
+    setSearchName(event.target.name.value);
+    setSearchCode(event.target.code.value);
+  }
+
+  const filterByName = (event) => {
+    setCurrentPage(1);
+    setSearchName(event.target.value);
+  }
+
+  const filterByCode = (event) => {
+    setCurrentPage(1);
+    setSearchCode(event.target.value);
+  }
+
+  const singleCheckBox = (id) => {
+
+    const checkValue = checkBoxValues.filter((v) => {
+      if(v == id){
+        return v;
+      }
+    })
+
+    if(checkValue.length > 0){
+      const finalValue = checkBoxValues.filter((v) => {
+        if(v != id){
+          return v;
+        }
+      })
+      setCheckBoxValues([...finalValue]);
+    } else {
+      setCheckBoxValues([...checkBoxValues, id]);
+    }
+
+    console.log(checkBoxValues);
+  }
+
+  const allCheckBoxSelect = () => {
+      if(checkBoxValues.length == colors.length){
+        setCheckBoxValues([]);
+      }  else {
+        setCheckBoxValues([]);
+
+        const ids = [];
+        colors.forEach((v) => {
+            ids.push(v._id);
+        })
+
+        setCheckBoxValues([...ids]);
+      } 
+  }
 
   return (
     <section className="w-full">
@@ -35,14 +101,25 @@ export default function ViewCategory() {
 
       <div className={`bg-gray-50 px-2 py-5 max-w-[1220px] duration-[1s] mx-auto mt-10 ${activeFilter ? "hidden" : "block"}`}>
 
-        <form className="flex max-w-sm">
-          <div className="relative w-full">
+        <form className="flex" autoComplete='off' onSubmit={ searchHandler }>
+          <div className="relative w-full me-4">
             <input
               type="text"
-              id="simple-search"
+              id="name-search"
+              name='name'
+              onKeyUp={ filterByName }
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search  name..."
-              required
+            />
+          </div>
+          <div className="relative w-full me-4">
+            <input
+              type="text"
+              id="code"
+              name='code'
+              onKeyUp={ filterByCode }
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              placeholder="Search  code..."
             />
           </div>
           <button
@@ -67,7 +144,6 @@ export default function ViewCategory() {
             <span className="sr-only">Search</span>
           </button>
         </form>
-
 
       </div>
       <div className="w-full min-h-[610px]">
@@ -98,7 +174,12 @@ export default function ViewCategory() {
                     <tr>
                       <th scope="col" class="p-4">
                         <div class="flex items-center">
-                          <input id="checkbox-all-search" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                          <input id="checkbox-all-search" 
+                          
+                          onClick={ allCheckBoxSelect }
+                          checked = { checkBoxValues.length == colors.length ? 'checked' : '' }
+
+                          type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                           <label for="checkbox-all-search" class="sr-only">checkbox</label>
                         </div>
                       </th>
@@ -128,7 +209,13 @@ export default function ViewCategory() {
                             <tr class="bg-white  dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                               <td class="w-4 p-4">
                                 <div class="flex items-center">
-                                  <input id="checkbox-table-search-1" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                  <input id="checkbox-table-search-1"
+                                  
+                                  checked={ (checkBoxValues.includes(v._id)) ? 'checked' : '' }
+
+                                  onClick={ () => singleCheckBox(v._id) }
+
+                                  type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                   <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
                                 </div>
                               </td>
@@ -175,6 +262,13 @@ export default function ViewCategory() {
                     }
                   </tbody>
                 </table>
+                <div className='w-100 auto mb-3'>
+                    <ResponsivePagination
+                      current={currentPage}
+                      total={totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
               </div>
 
 

@@ -9,13 +9,28 @@ export default function AddColor() {
   const [color, setColor] = useState("#000000");
   const params = useParams();
   const [updatedId, setUpdatedId] = useState('');
+  const [colorDetails, setColorDetails] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (params.id != '') {
       setUpdatedId(params.id);
+
+
+      axios.post(`http://localhost:5000/api/admin/color/details/${params.id}`)
+        .then((result) => {
+          if (result.data._status == true) {
+            setColorDetails(result.data._data)
+            setColor(result.data._data.code)
+          } else {
+            setColorDetails('');
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong !!');
+        })
     }
-  },[params]);
+  }, [params]);
 
   const handleColorChange = (newColor) => {
     setColor(newColor.hex);
@@ -25,30 +40,43 @@ export default function AddColor() {
     event.preventDefault();
 
     const formData = {
-      name : event.target.name.value,
-      code : color,
-      order : event.target.order.value,
+      name: event.target.name.value,
+      code: color,
+      order: event.target.order.value,
     }
 
-    if(!updatedId){
+    if (!updatedId) {
       // Add Color
       axios.post('http://localhost:5000/api/admin/color/create', formData)
-      .then((result) => {
-        if(result.data._status == true){
-          toast.success(result.data._message);
-          event.target.reset();
-          navigate('/color/view');
-        } else {
-          toast.error(result.data._message);
-        }
-      })
-      .catch(() => {
-        toast.error('Something went wrong !');
-      })
-      
+        .then((result) => {
+          if (result.data._status == true) {
+            toast.success(result.data._message);
+            event.target.reset();
+            navigate('/color/view');
+          } else {
+            toast.error(result.data._message);
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong !');
+        })
+
 
     } else {
       // Update Color
+      axios.put('http://localhost:5000/api/admin/color/update/'+updatedId, formData)
+        .then((result) => {
+          if (result.data._status == true) {
+            toast.success(result.data._message);
+            event.target.reset();
+            navigate('/color/view');
+          } else {
+            toast.error(result.data._message);
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong !');
+        })
     }
 
   }
@@ -69,6 +97,7 @@ export default function AddColor() {
             <label className="block text-md font-medium text-gray-900">Color Name</label>
             <input
               type="text" name="name"
+              defaultValue={colorDetails.name}
               className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
               placeholder="Enter Color Name"
             />
@@ -88,6 +117,7 @@ export default function AddColor() {
             <label className="block text-md font-medium text-gray-900">Order</label>
             <input
               type="number" name="order"
+              defaultValue={colorDetails.order}
               className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
               placeholder="Enter Order"
             />
