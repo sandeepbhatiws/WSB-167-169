@@ -17,7 +17,7 @@ export default function AddColor() {
       setUpdatedId(params.id);
 
 
-      axios.post(`http://localhost:5000/api/admin/color/details/${params.id}`)
+      axios.post(`${ import.meta.env.VITE_BASE_URL }/${ import.meta.env.VITE_COLOR_API }/details/${params.id}`)
         .then((result) => {
           if (result.data._status == true) {
             setColorDetails(result.data._data)
@@ -47,7 +47,7 @@ export default function AddColor() {
 
     if (!updatedId) {
       // Add Color
-      axios.post('http://localhost:5000/api/admin/color/create', formData)
+      axios.post(`${ import.meta.env.VITE_BASE_URL }/${ import.meta.env.VITE_COLOR_API }/create`, formData)
         .then((result) => {
           if (result.data._status == true) {
             toast.success(result.data._message);
@@ -64,7 +64,7 @@ export default function AddColor() {
 
     } else {
       // Update Color
-      axios.put('http://localhost:5000/api/admin/color/update/'+updatedId, formData)
+      axios.put(`${ import.meta.env.VITE_BASE_URL }/${ import.meta.env.VITE_COLOR_API }/update/${updatedId}`, formData)
         .then((result) => {
           if (result.data._status == true) {
             toast.success(result.data._message);

@@ -19,26 +19,28 @@ export default function ViewCategory() {
   const [searchName, setSearchName] = useState('');
   const [searchCode, setSearchCode] = useState('');
   const [checkBoxValues, setCheckBoxValues] = useState([]);
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+  const [apiStatus, setAPIStatus] = useState(true);
 
   useEffect(() => {
-    axios.post('http://localhost:5000/api/admin/color/view',{
-      page : currentPage,
-      name : searchName,
-      code : searchCode
+    axios.post(`${ import.meta.env.VITE_BASE_URL }/${ import.meta.env.VITE_COLOR_API }/view`, {
+      page: currentPage,
+      name: searchName,
+      code: searchCode
     })
-    .then((result) => {
-      if(result.data._status == true){
-        setColors(result.data._data)
-        setTotalPages(result.data._paginate.total_pages)
-      } else {
-        setColors([]);
-        setTotalPages(1);
-      }
-    })
-    .catch(() => {
-      toast.error('Something went wrong !!');
-    })
-  },[currentPage, searchName, searchCode]);
+      .then((result) => {
+        if (result.data._status == true) {
+          setColors(result.data._data)
+          setTotalPages(result.data._paginate.total_pages)
+        } else {
+          setColors([]);
+          setTotalPages(1);
+        }
+      })
+      .catch(() => {
+        toast.error('Something went wrong !!');
+      })
+  }, [currentPage, searchName, searchCode, apiStatus]);
 
   const searchHandler = (event) => {
     event.preventDefault();
@@ -60,38 +62,90 @@ export default function ViewCategory() {
   const singleCheckBox = (id) => {
 
     const checkValue = checkBoxValues.filter((v) => {
-      if(v == id){
+      if (v == id) {
         return v;
       }
     })
 
-    if(checkValue.length > 0){
+    if (checkValue.length > 0) {
       const finalValue = checkBoxValues.filter((v) => {
-        if(v != id){
+        if (v != id) {
           return v;
         }
       })
       setCheckBoxValues([...finalValue]);
-    } else {
-      setCheckBoxValues([...checkBoxValues, id]);
-    }
 
-    console.log(checkBoxValues);
+      if (finalValue.length > 0) {
+        setButtonDisabled(false);
+      } else {
+        setButtonDisabled(true);
+      }
+
+    } else {
+      var newData = [...checkBoxValues, id]
+      setCheckBoxValues(newData);
+
+      if (newData.length > 0) {
+        setButtonDisabled(false);
+      } else {
+        setButtonDisabled(true);
+      }
+    }
   }
 
   const allCheckBoxSelect = () => {
-      if(checkBoxValues.length == colors.length){
-        setCheckBoxValues([]);
-      }  else {
-        setCheckBoxValues([]);
+    if (checkBoxValues.length == colors.length) {
+      setCheckBoxValues([]);
+      setButtonDisabled(true);
+    } else {
+      setCheckBoxValues([]);
 
-        const ids = [];
-        colors.forEach((v) => {
-            ids.push(v._id);
-        })
+      const ids = [];
+      colors.forEach((v) => {
+        ids.push(v._id);
+      })
 
-        setCheckBoxValues([...ids]);
-      } 
+      setCheckBoxValues([...ids]);
+      setButtonDisabled(false);
+    }
+  }
+
+  const changeStatus = () => {
+    axios.put(`${ import.meta.env.VITE_BASE_URL }/${ import.meta.env.VITE_COLOR_API }/change-status`, {
+      ids : checkBoxValues
+    })
+      .then((result) => {
+        if (result.data._status == true) {
+          toast.success(result.data._message);
+          setAPIStatus(!apiStatus)
+          setCheckBoxValues([]);
+          setButtonDisabled(true);
+        } else {
+          toast.error(result.data._message);
+        }
+      })
+      .catch(() => {
+        toast.error('Something went wrong !!');
+      })
+  }
+
+  const deleteRecords = () => {
+    axios.put(`${ import.meta.env.VITE_BASE_URL }/${ import.meta.env.VITE_COLOR_API }/delete`, {
+      ids : checkBoxValues
+    })
+      .then((result) => {
+        if (result.data._status == true) {
+          toast.success(result.data._message);
+          setAPIStatus(!apiStatus)
+          setCheckBoxValues([]);
+          setButtonDisabled(true);
+        } else {
+          toast.error(result.data._message);
+        }
+      })
+      .catch(() => {
+        toast.error('Something went wrong !!');
+      })
   }
 
   return (
@@ -101,13 +155,13 @@ export default function ViewCategory() {
 
       <div className={`bg-gray-50 px-2 py-5 max-w-[1220px] duration-[1s] mx-auto mt-10 ${activeFilter ? "hidden" : "block"}`}>
 
-        <form className="flex" autoComplete='off' onSubmit={ searchHandler }>
+        <form className="flex" autoComplete='off' onSubmit={searchHandler}>
           <div className="relative w-full me-4">
             <input
               type="text"
               id="name-search"
               name='name'
-              onKeyUp={ filterByName }
+              onKeyUp={filterByName}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search  name..."
             />
@@ -117,7 +171,7 @@ export default function ViewCategory() {
               type="text"
               id="code"
               name='code'
-              onKeyUp={ filterByCode }
+              onKeyUp={filterByCode}
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search  code..."
             />
@@ -157,8 +211,16 @@ export default function ViewCategory() {
                 {activeFilter ? <FaFilter className='text-[18px]' /> : <MdFilterAltOff className='text-[18px]' />}
               </div>
 
-              <button type="button" class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"> Change Status</button>
-              <button type="button" className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Delete </button>
+              <button type="button"
+                onClick={changeStatus}
+                class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                disabled={buttonDisabled ? 'disabled' : ''}
+              > Change Status</button>
+
+              <button type="button"
+                onClick={deleteRecords}
+                className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                disabled={buttonDisabled ? 'disabled' : ''} >Delete </button>
             </div>
           </div>
           <div className="border border-t-0 rounded-b-md border-slate-400">
@@ -174,12 +236,12 @@ export default function ViewCategory() {
                     <tr>
                       <th scope="col" class="p-4">
                         <div class="flex items-center">
-                          <input id="checkbox-all-search" 
-                          
-                          onClick={ allCheckBoxSelect }
-                          checked = { checkBoxValues.length == colors.length ? 'checked' : '' }
+                          <input id="checkbox-all-search"
 
-                          type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                            onClick={allCheckBoxSelect}
+                            checked={checkBoxValues.length == colors.length ? 'checked' : ''}
+
+                            type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                           <label for="checkbox-all-search" class="sr-only">checkbox</label>
                         </div>
                       </th>
@@ -210,12 +272,12 @@ export default function ViewCategory() {
                               <td class="w-4 p-4">
                                 <div class="flex items-center">
                                   <input id="checkbox-table-search-1"
-                                  
-                                  checked={ (checkBoxValues.includes(v._id)) ? 'checked' : '' }
 
-                                  onClick={ () => singleCheckBox(v._id) }
+                                    checked={(checkBoxValues.includes(v._id)) ? 'checked' : ''}
 
-                                  type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                    onClick={() => singleCheckBox(v._id)}
+
+                                    type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                   <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
                                 </div>
                               </td>
@@ -233,14 +295,14 @@ export default function ViewCategory() {
                               <td class=" py-4">
                                 {
                                   v.status == 1
-                                  ?
-                                  <button type="button" class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-1.5 text-center me-2 mb-2">Active</button>
-                                  :
-                                  <button type="button" class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-1.5 text-center me-2 mb-2">Deactive</button>
+                                    ?
+                                    <button type="button" class="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-1.5 text-center me-2 mb-2">Active</button>
+                                    :
+                                    <button type="button" class="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm px-5 py-1.5 text-center me-2 mb-2">Deactive</button>
                                 }
-                                
 
-                                
+
+
                               </td>
                               <td class=" py-4">
 
@@ -256,19 +318,19 @@ export default function ViewCategory() {
                         :
                         <tr class="bg-white dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                           <td colSpan={6} class="px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white text-center">
-                              <div class="text-base font-semibold">No Record Found !!</div>
+                            <div class="text-base font-semibold">No Record Found !!</div>
                           </td>
                         </tr>
                     }
                   </tbody>
                 </table>
                 <div className='w-100 auto mb-3'>
-                    <ResponsivePagination
-                      current={currentPage}
-                      total={totalPages}
-                      onPageChange={setCurrentPage}
-                    />
-                  </div>
+                  <ResponsivePagination
+                    current={currentPage}
+                    total={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
               </div>
 
 

@@ -1,4 +1,4 @@
-const colorModal = require("../../models/color.js");
+const materialModal = require("../../models/material.js");
 const env = require('dotenv').config();
 
 exports.create = (request, response) => {
@@ -7,7 +7,7 @@ exports.create = (request, response) => {
 
     try {
 
-        var saveData = new colorModal(data).save()
+        var saveData = new materialModal(data).save()
             .then((result) => {
                 const data = {
                     _status: true,
@@ -81,13 +81,6 @@ exports.view = async (request, response) => {
                     addCondition.push({ name : name })
                 }
             }
-
-            if(request.body.code != undefined){
-                if(request.body.code != ''){
-                    var code = new RegExp(request.body.code,"i");
-                    addCondition.push({ code : code })
-                }
-            }
         }
 
         if(addCondition.length > 0){
@@ -100,9 +93,9 @@ exports.view = async (request, response) => {
             filter.$or = orCondition;
         }
 
-        total_records = await colorModal.find(filter).countDocuments();
+        total_records = await materialModal.find(filter).countDocuments();
 
-        await colorModal.find(filter).select('name code status order').skip(skip).limit(limit).sort({ _id : 'desc'})
+        await materialModal.find(filter).select('name status order').skip(skip).limit(limit).sort({ _id : 'desc'})
             .then((result) => {
                 if(result.length > 0){
 
@@ -153,7 +146,7 @@ exports.view = async (request, response) => {
 exports.details = async (request, response) => {
     try {
 
-        await colorModal.findById(request.params.id)
+        await materialModal.findById(request.params.id)
             .then((result) => {
                 if(result){
                     const data = {
@@ -199,7 +192,7 @@ exports.update = async(request, response) => {
         var data = request.body;
         data.updated_at = Date.now();
 
-        var saveData = await colorModal.updateOne({
+        var saveData = await materialModal.updateOne({
             _id : request.params.id
         },{
             $set : data
@@ -257,7 +250,7 @@ exports.destroy = async (request, response) => {
             deleted_at : Date.now()
         }
 
-        var saveData = await colorModal.updateMany({
+        var saveData = await materialModal.updateMany({
             _id : request.body.ids
         },{
             $set : data
@@ -310,7 +303,7 @@ exports.destroy = async (request, response) => {
 
 exports.changeStatus = async(request, response) => {
     try {
-        var saveData = await colorModal.updateMany({
+        var saveData = await materialModal.updateMany({
             _id : request.body.ids
         },[{
             $set : {
