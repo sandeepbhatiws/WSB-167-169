@@ -21,11 +21,13 @@ server.get('/', (request, response) => {
 });
 
 server.use('/uploads/default', express.static('uploads/default'));
+server.use('/uploads/categories', express.static('uploads/categories'));
 
 // Admin API URls
 require('./src/routes/admin/default.routes.js')(server);
 require('./src/routes/admin/color.routes.js')(server);
 require('./src/routes/admin/material.routes.js')(server);
+require('./src/routes/admin/category.routes.js')(server);
 
 
 mongoose.connect(`mongodb+srv://${process.env.user_name}:${process.env.password}@sandeep.ktfb1.mongodb.net/${process.env.db_name}?appName=sandeep`)

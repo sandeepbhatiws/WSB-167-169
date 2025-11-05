@@ -311,6 +311,59 @@ exports.destroy = async (request, response) => {
     }
 }
 
-exports.changeStatus = (request, response) => {
+exports.changeStatus = async(request, response) => {
+    try {
+        var saveData = await defaultModal.updateMany({
+            _id : request.body.ids
+        },[{
+            $set : {
+                status : {
+                    $not : "$status"
+                }
+            }
+        }])
+            .then((result) => {
+                if(result.matchedCount > 0){
+                    const data = {
+                        _status: true,
+                        _message: 'Change status succussfully !!',
+                        _data: result
+                    }
+                    response.send(data);
+                } else {
+                    const data = {
+                        _status: false,
+                        _message: 'Record does not exit !!',
+                        _data: result
+                    }
+                    response.send(data);
+                }
+                
+            })
+            .catch((error) => {
 
+                var errors = [];
+
+                for (var i in error.errors) {
+                    errors.push(error.errors[i].message);
+                }
+
+                const data = {
+                    _status: false,
+                    _message: 'Something went wrong !!',
+                    _error: errors,
+                    _data: null
+                }
+                response.send(data);
+            });
+
+    } catch (error) {
+        const data = {
+            _status: false,
+            _message: 'Something went wrong !!',
+            _error: error,
+            _data: null
+        }
+        response.send(data);
+    }
 }
