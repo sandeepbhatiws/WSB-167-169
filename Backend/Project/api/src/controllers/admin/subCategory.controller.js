@@ -1,4 +1,5 @@
 const categoryModal = require("../../models/category");
+const subCategoryModal = require("../../models/subCategory");
 const env = require('dotenv').config();
 var slugify = require('slugify')
 
@@ -15,6 +16,80 @@ const generateUniqueSlug = async (Model, baseSlug) => {
   return slug;
 };
 
+exports.viewCategory = async (request, response) => {
+    try {
+
+        const addCondition = [
+            {
+                deleted_at : null,
+            }
+        ];
+
+        const orCondition = [{
+            status : true,
+        }];
+
+        if(request.body){
+            if(request.body.id != undefined){
+                if(request.body.id != ''){
+                    orCondition.push({ _id : request.body.id })
+                }
+            }
+        }
+
+        if(addCondition.length > 0){
+            var filter = { $and : addCondition }
+        } else {
+            var filter = {}
+        }
+
+        if(orCondition.length > 0){
+            filter.$or = orCondition;
+        }
+
+        console.log(filter);
+
+        await categoryModal.find(filter).select('_id name image status order')
+        .sort({ _id : 'desc'})
+        .then((result) => {
+            if(result.length > 0){
+                const data = {
+                    _status: true,
+                    _message: 'Record found succussfully !!',
+                    _data: result
+                }
+                response.send(data);
+            } else {
+                const data = {
+                    _status: false,
+                    _message: 'No Record found !!',
+                    _data: result
+                }
+                response.send(data);
+            }
+            
+        })
+        .catch((error) => {
+            const data = {
+                _status: false,
+                _message: 'Something went wrong !!',
+                _error: error,
+                _data: []
+            }
+            response.send(data);
+        });
+
+    } catch (error) {
+        const data = {
+            _status: false,
+            _message: 'Something went wrong !!',
+            _error: error,
+            _data: []
+        }
+        response.send(data);
+    }
+}
+
 exports.create = async(request, response) => {
 
     var data = request.body;
@@ -24,9 +99,8 @@ exports.create = async(request, response) => {
             lower: true,
             strict: true,
         });
+        data.slug = await generateUniqueSlug(subCategoryModal, slug);
     }
-
-    data.slug = await generateUniqueSlug(categoryModal, slug);
 
     if(request.file){
         data.image = request.file.filename;
@@ -34,7 +108,7 @@ exports.create = async(request, response) => {
 
     try {
 
-        var saveData = new categoryModal(data).save()
+        var saveData = new subCategoryModal(data).save()
             .then((result) => {
                 const data = {
                     _status: true,
@@ -107,6 +181,12 @@ exports.view = async (request, response) => {
                     addCondition.push({ name : name })
                 }
             }
+
+            if(request.body.parent_category_id != undefined){
+                if(request.body.parent_category_id != ''){
+                    addCondition.push({ parent_category : request.body.parent_category_id })
+                }
+            }
         }
 
         if(addCondition.length > 0){
@@ -119,9 +199,12 @@ exports.view = async (request, response) => {
             filter.$or = orCondition;
         }
 
-        total_records = await categoryModal.find(filter).countDocuments();
+        total_records = await subCategoryModal.find(filter).countDocuments();
 
-        await categoryModal.find(filter).select('name image status order').skip(skip).limit(limit).sort({ _id : 'desc'})
+        await subCategoryModal.find(filter)
+        .select('name parent_category image status order')
+        .populate('parent_category', 'name')
+        .skip(skip).limit(limit).sort({ _id : 'desc'})
             .then((result) => {
                 if(result.length > 0){
 
@@ -173,7 +256,7 @@ exports.view = async (request, response) => {
 exports.details = async (request, response) => {
     try {
 
-        await categoryModal.findById(request.params.id)
+        await subCategoryModal.findById(request.params.id)
             .then((result) => {
                 if(result){
                     const data = {
@@ -225,7 +308,7 @@ exports.update = async(request, response) => {
             strict: true,
         });
 
-        data.slug = await generateUniqueSlug(categoryModal, slug);
+        data.slug = await generateUniqueSlug(subCategoryModal, slug);
 
         data.updated_at = Date.now();
 
@@ -235,7 +318,7 @@ exports.update = async(request, response) => {
             }
         }
 
-        var saveData = await categoryModal.updateOne({
+        var saveData = await subCategoryModal.updateOne({
             _id : request.params.id
         },{
             $set : data
@@ -293,7 +376,7 @@ exports.destroy = async (request, response) => {
             deleted_at : Date.now()
         }
 
-        var saveData = await categoryModal.updateMany({
+        var saveData = await subCategoryModal.updateMany({
             _id : request.body.ids
         },{
             $set : data
@@ -346,7 +429,7 @@ exports.destroy = async (request, response) => {
 
 exports.changeStatus = async(request, response) => {
     try {
-        var saveData = await categoryModal.updateMany({
+        var saveData = await subCategoryModal.updateMany({
             _id : request.body.ids
         },[{
             $set : {

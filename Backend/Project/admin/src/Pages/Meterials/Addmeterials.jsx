@@ -17,7 +17,6 @@ export default function AddMaterial() {
         .then((result) => {
           if (result.data._status == true) {
             setMaterialDetails(result.data._data)
-            setMaterial(result.data._data.code)
           } else {
             setMaterialDetails('');
           }
