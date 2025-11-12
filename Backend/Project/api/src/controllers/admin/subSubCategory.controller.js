@@ -1,4 +1,5 @@
-const categoryModal = require("../../models/category");
+const subCategoryModal = require("../../models/subCategory");
+const subSubCategoryModal = require("../../models/subSubCategory");
 const env = require('dotenv').config();
 var slugify = require('slugify')
 
@@ -15,6 +16,84 @@ const generateUniqueSlug = async (Model, baseSlug) => {
   return slug;
 };
 
+exports.viewSubCategory = async (request, response) => {
+    try {
+
+        const addCondition = [
+            {
+                deleted_at : null,
+            }
+        ];
+
+        const orCondition = [{
+            status : true,
+        }];
+
+        if(request.body){
+            if(request.body.id != undefined){
+                if(request.body.id != ''){
+                    orCondition.push({ _id : request.body.id })
+                }
+            }
+
+            if(request.body.parent_category != undefined){
+                if(request.body.parent_category != ''){
+                    addCondition.push({ parent_category : request.body.parent_category })
+                }
+            }
+        }
+
+        if(addCondition.length > 0){
+            var filter = { $and : addCondition }
+        } else {
+            var filter = {}
+        }
+
+        if(orCondition.length > 0){
+            filter.$or = orCondition;
+        }
+
+        await subCategoryModal.find(filter).select('_id name parent_category')
+        .sort({ _id : 'desc'})
+        .then((result) => {
+            if(result.length > 0){
+                const data = {
+                    _status: true,
+                    _message: 'Record found succussfully !!',
+                    _data: result
+                }
+                response.send(data);
+            } else {
+                const data = {
+                    _status: false,
+                    _message: 'No Record found !!',
+                    _data: result
+                }
+                response.send(data);
+            }
+            
+        })
+        .catch((error) => {
+            const data = {
+                _status: false,
+                _message: 'Something went wrong !!',
+                _error: error,
+                _data: []
+            }
+            response.send(data);
+        });
+
+    } catch (error) {
+        const data = {
+            _status: false,
+            _message: 'Something went wrong !!',
+            _error: error,
+            _data: []
+        }
+        response.send(data);
+    }
+}
+
 exports.create = async(request, response) => {
 
     var data = request.body;
@@ -24,9 +103,8 @@ exports.create = async(request, response) => {
             lower: true,
             strict: true,
         });
+        data.slug = await generateUniqueSlug(subSubCategoryModal, slug);
     }
-
-    data.slug = await generateUniqueSlug(categoryModal, slug);
 
     if(request.file){
         data.image = request.file.filename;
@@ -34,8 +112,11 @@ exports.create = async(request, response) => {
 
     try {
 
-        var saveData = new categoryModal(data).save()
-            .then((result) => {
+        var saveData = new subSubCategoryModal(data).save()
+            .then(async(result) => {
+
+                await subCategoryModal.updateOne({ _id: request.body.sub_category }, { $push: { sub_sub_categories: { $each: [result._id] } } });
+
                 const data = {
                     _status: true,
                     _message: 'Record created succussfully !!',
@@ -107,6 +188,18 @@ exports.view = async (request, response) => {
                     addCondition.push({ name : name })
                 }
             }
+
+            if(request.body.parent_category_id != undefined){
+                if(request.body.parent_category_id != ''){
+                    addCondition.push({ parent_category : request.body.parent_category_id })
+                }
+            }
+
+            if(request.body.sub_category_id != undefined){
+                if(request.body.sub_category_id != ''){
+                    addCondition.push({ sub_category : request.body.sub_category_id })
+                }
+            }
         }
 
         if(addCondition.length > 0){
@@ -119,10 +212,12 @@ exports.view = async (request, response) => {
             filter.$or = orCondition;
         }
 
-        total_records = await categoryModal.find(filter).countDocuments();
+        total_records = await subSubCategoryModal.find(filter).countDocuments();
 
-        await categoryModal.find(filter).select('name sub_categories image status order')
-        .populate('sub_categories', 'name')
+        await subSubCategoryModal.find(filter)
+        .select('name parent_category image status order')
+        .populate('parent_category', 'name')
+        .populate('sub_category', 'name')
         .skip(skip).limit(limit).sort({ _id : 'desc'})
             .then((result) => {
                 if(result.length > 0){
@@ -175,7 +270,7 @@ exports.view = async (request, response) => {
 exports.details = async (request, response) => {
     try {
 
-        await categoryModal.findById(request.params.id)
+        await subSubCategoryModal.findById(request.params.id)
             .then((result) => {
                 if(result){
                     const data = {
@@ -218,8 +313,6 @@ exports.details = async (request, response) => {
 
 exports.update = async(request, response) => {
     try {
-
-        
         var data = request.body;
 
         var slug = slugify(request.body.name, {
@@ -227,7 +320,7 @@ exports.update = async(request, response) => {
             strict: true,
         });
 
-        data.slug = await generateUniqueSlug(categoryModal, slug);
+        data.slug = await generateUniqueSlug(subSubCategoryModal, slug);
 
         data.updated_at = Date.now();
 
@@ -237,13 +330,16 @@ exports.update = async(request, response) => {
             }
         }
 
-        var saveData = await categoryModal.updateOne({
+        var saveData = await subSubCategoryModal.updateOne({
             _id : request.params.id
         },{
             $set : data
         })
-            .then((result) => {
+            .then(async(result) => {
                 if(result.matchedCount == 1){
+
+                    await subCategoryModal.updateOne({ _id: request.body.sub_category }, { $push: { sub_sub_categories: { $each: [request.params.id] } } });
+
                     const data = {
                         _status: true,
                         _message: 'Record updated succussfully !!',
@@ -295,7 +391,7 @@ exports.destroy = async (request, response) => {
             deleted_at : Date.now()
         }
 
-        var saveData = await categoryModal.updateMany({
+        var saveData = await subSubCategoryModal.updateMany({
             _id : request.body.ids
         },{
             $set : data
@@ -348,7 +444,7 @@ exports.destroy = async (request, response) => {
 
 exports.changeStatus = async(request, response) => {
     try {
-        var saveData = await categoryModal.updateMany({
+        var saveData = await subSubCategoryModal.updateMany({
             _id : request.body.ids
         },[{
             $set : {

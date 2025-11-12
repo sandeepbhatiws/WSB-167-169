@@ -109,7 +109,10 @@ exports.create = async(request, response) => {
     try {
 
         var saveData = new subCategoryModal(data).save()
-            .then((result) => {
+            .then(async(result) => {
+
+                await categoryModal.updateOne({ _id: request.body.parent_category }, { $push: { sub_categories: { $each: [result._id] } } });
+
                 const data = {
                     _status: true,
                     _message: 'Record created succussfully !!',
@@ -202,8 +205,9 @@ exports.view = async (request, response) => {
         total_records = await subCategoryModal.find(filter).countDocuments();
 
         await subCategoryModal.find(filter)
-        .select('name parent_category image status order')
+        .select('name parent_category sub_sub_categories image status order')
         .populate('parent_category', 'name')
+        .populate('sub_sub_categories', 'name')
         .skip(skip).limit(limit).sort({ _id : 'desc'})
             .then((result) => {
                 if(result.length > 0){
@@ -300,7 +304,6 @@ exports.details = async (request, response) => {
 exports.update = async(request, response) => {
     try {
 
-        
         var data = request.body;
 
         var slug = slugify(request.body.name, {
@@ -323,8 +326,11 @@ exports.update = async(request, response) => {
         },{
             $set : data
         })
-            .then((result) => {
+            .then(async(result) => {
                 if(result.matchedCount == 1){
+
+                    await categoryModal.updateOne({ _id: request.body.parent_category }, { $push: { sub_categories: { $each: [request.params.id] } } });
+
                     const data = {
                         _status: true,
                         _message: 'Record updated succussfully !!',

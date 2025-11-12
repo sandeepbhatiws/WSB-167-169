@@ -1,17 +1,10 @@
 const mongoose = require('mongoose');
 
-const categorySchema = new mongoose.Schema({
+const subSubCategorySchema = new mongoose.Schema({
     name : {
         type : String,
         required : [true, 'Name is required'],
         match: /^[a-zA-Z ]{2,15}$/,
-        // validate: {
-        //     validator: async function(v) {
-        //         const data = await this.constructor.findOne({ name: v, deleted_at : null });
-        //         return !data;
-        //     },
-        //     message: props => `The specified data is already in use.`
-        // }
     },
     slug : {
         type : String,
@@ -21,10 +14,15 @@ const categorySchema = new mongoose.Schema({
         type : String,
         default : ''
     },
-    sub_categories : {
-        type : Array,
+    parent_category : {
+        type : String,
+        ref : 'categories',
+        default : ''
+    },
+    sub_category : {
+        type : String,
         ref : 'sub_categories',
-        default : []
+        default : ''
     },
     status : {
         type : Boolean,
@@ -50,6 +48,6 @@ const categorySchema = new mongoose.Schema({
     },
 });
 
-const categoryModal = mongoose.model('categories', categorySchema);
+const subSubCategoryModal = mongoose.model('sub_sub_categories', subSubCategorySchema);
 
-module.exports = categoryModal;
+module.exports = subSubCategoryModal;

@@ -29,6 +29,8 @@ require('./src/routes/admin/color.routes.js')(server);
 require('./src/routes/admin/material.routes.js')(server);
 require('./src/routes/admin/category.routes.js')(server);
 require('./src/routes/admin/subCategory.routes.js')(server);
+require('./src/routes/admin/subSubCategory.routes.js')(server);
+
 
 
 mongoose.connect(`mongodb+srv://${process.env.user_name}:${process.env.password}@sandeep.ktfb1.mongodb.net/${process.env.db_name}?appName=sandeep`)
