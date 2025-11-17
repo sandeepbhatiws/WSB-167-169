@@ -5,9 +5,121 @@ import "dropify/dist/js/dropify.min.js";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useForm } from 'react-hook-form';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export default function ProductDetails() {
+
+  const [materials, setMaterials] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [subSubCategories, setSubSubCategories] = useState([]);
+  const [parent_category_id, set_parent_category_id] = useState('');
+  const [value, setValue] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-materials`)
+    .then((result) => {
+      if(result.data._status == true){
+        setMaterials(result.data._data);
+      }
+    })
+    .catch(() => {
+      toast.error('Something went wrong');
+    })
+
+    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-colors`)
+    .then((result) => {
+      if(result.data._status == true){
+        setColors(result.data._data);
+      }
+    })
+    .catch(() => {
+      toast.error('Something went wrong');
+    })
+  }, []);
+
+  useEffect(() => {
+    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-parent-category`)
+    .then((result) => {
+      if(result.data._status == true){
+        setCategories(result.data._data);
+      }
+    })
+    .catch(() => {
+      toast.error('Something went wrong');
+    })
+  }, []);
+
+  const selectCategories = (event) => {
+    set_parent_category_id(event.target.value);
+
+    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-sub-category`, {
+      parent_category : event.target.value
+    })
+    .then((result) => {
+      if(result.data._status == true){
+        setSubCategories(result.data._data);
+      } else {
+        setSubCategories([]);
+      }
+    })
+    .catch(() => {
+      toast.error('Something went wrong');
+    })
+  }
+
+  const selectSubCategories = (event) => {
+    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-sub-sub-category`,{
+      parent_category : parent_category_id,
+      sub_category : event.target.value
+    })
+    .then((result) => {
+      if(result.data._status == true){
+        setSubSubCategories(result.data._data);
+      } else {
+        setSubSubCategories([]);
+      }
+    })
+    .catch(() => {
+      toast.error('Something went wrong');
+    })
+  }
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log("Form Data:", data);
+
+    data.description = value;
+
+    // Add Product
+      axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/create`, data)
+        .then((result) => {
+          if (result.data._status == true) {
+            toast.success(result.data._message);
+            // event.target.reset();
+            navigate('/product/view');
+          } else {
+            toast.error(result.data._message);
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong !');
+        })
+    // alert("Product Created Successfully!");
+  };
+
+
+
+
 
   useEffect(() => {
     $(".dropify").dropify({
@@ -20,18 +132,7 @@ export default function ProductDetails() {
     });
   }, []);
 
-  const [value, setValue] = useState('');
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm();
-
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    // alert("Product Created Successfully!");
-  };
+  
   // update work
   const [updateIdState, setUpdateIdState] = useState(false)
   let updateId = useParams().id
@@ -43,6 +144,8 @@ export default function ProductDetails() {
       setUpdateIdState(true)
     }
   }, [updateId])
+
+
   return (
     <section className="w-full">
 
@@ -68,14 +171,12 @@ export default function ProductDetails() {
         </ol>
       </nav>
 
-
-
       <div className='w-full px-6 py-6  '>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} autoComplete='off'>
           <div className="grid grid-cols-3 gap-[10px] ">
             {/* for left */}
-            <div className="for-images ">
+            <div className="for-images">
 
               <div className="">
                 <label
@@ -86,14 +187,13 @@ export default function ProductDetails() {
                 </label>
                 <input
                   type="file"
-                  id="ProductImage"
+                  name='image'
+                  id="image"
                   className="dropify"
                   data-height="160"
-                  {...register("productImage", { required: "Product Image is required" })}
+                  {...register("image", { required: "Product Image is required" })}
                 />
-                {errors.productImage && <p className="text-red-500 text-sm">{errors.productImage.message}</p>}
-
-
+                {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
               </div>
 
               <div className="">
@@ -108,9 +208,7 @@ export default function ProductDetails() {
                   id="backImage"
                   className="dropify"
                   data-height="160"
-                  {...register("backImage", { required: "Back Image is required" })}
                 />
-                {errors.backImage && <p className="text-red-500 text-sm">{errors.backImage.message}</p>}
               </div>
 
               <div className="">
@@ -122,12 +220,13 @@ export default function ProductDetails() {
                 </label>
                 <input
                   type="file"
-                  id="GalleryImage"
+                  id="images"
+                  name='images'
                   className="dropify"
                   data-height="160"
-                  {...register("GalleryImage", { required: "Gallery Image is required" })}
+                  {...register("images", { required: "Gallery Image is required" })}
                 />
-                {errors.GalleryImage && <p className="text-red-500 text-sm">{errors.GalleryImage.message}</p>}
+                {errors.images && <p className="text-red-500 text-sm">{errors.images.message}</p>}
               </div>
             </div>
 
@@ -139,138 +238,41 @@ export default function ProductDetails() {
                   htmlFor="Prodct_Name"
                   className="block  text-md font-medium text-gray-900 text-[#76838f]"
                 >
-                  Prodct Name
+                  Product Name
                 </label>
                 <input
                   type="text"
+                  name='name'
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
-                  placeholder='Prodct Name'
-                  {...register("Prodct_Name", { required: "Prodct Name is required" })}
+                  placeholder='Product Name'
+                  {...register("name", { required: "Product Name is required" })}
                 />
-                {errors.Prodct_Name && <p className="text-red-500 text-sm">{errors.Prodct_Name.message}</p>}
+                {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
               </div>
 
               <div className="mb-5">
                 <label
-                  htmlFor="categoryName"
-                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
-                >
-                  Select Sub Category
-                </label>
-                <select
-                  {...register("Sub_Category", { required: "Sub Category is required" })}
-                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
-                  <option value="">Select Category</option>
-                  <option value="mobile">Mobile Phones</option>
-                  <option value="laptop">Laptops</option>
-                  <option value="men">Men's Wear</option>
-                  <option value="women">Women's Wear</option>
-
-                </select>
-                {errors.Sub_Category && <p className="text-red-500 text-sm">{errors.Sub_Category.message}</p>}
-
-              </div>
-
-              <div className="mb-5">
-                <label
-                  htmlFor="categoryName"
+                  htmlFor="materialname"
                   className="block  text-md font-medium text-gray-900 text-[#76838f]"
                 >
                   Select Meterial
                 </label>
                 <select
-                  {...register("Meterial", { required: "Meterial is required" })}
+                  {...register("material_ids", { required: "Meterial is required" })}
+                  name='material_ids'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="">Neem</option>
-                  <option value="">Babbul</option>
-                  <option value="">Neem</option>
-                  <option value="">Babbul</option>
-                  <option value="">Neem</option>
-                  <option value="">Babbul</option>
-                  <option value="">Neem</option>
-                  <option value="">Babbul</option>
-
+                  {
+                    materials.map((v,i) => {
+                      return(
+                        <option key={i} value={v._id}>{v.name}</option>
+                      )
+                    })
+                  }
                 </select>
-                {errors.Meterial && <p className="text-red-500 text-sm">{errors.Meterial.message}</p>}
+                {errors.material_ids && <p className="text-red-500 text-sm">{errors.material_ids.message}</p>}
               </div>
 
-              <div className="mb-5">
-                <label
-                  htmlFor="categoryName"
-                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
-                >
-                  Select Prodcut Type
-                </label>
-                <select
-                  {...register("Prodcut_Type", { required: "Prodcut Type is required" })}
-                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
-                  <option value="">Nothing Selected</option>
-                  <option value="">Featured</option>
-                  <option value="">New Arrivals</option>
-                  <option value="">Onsale</option>
-
-
-                </select>
-                {errors.Prodcut_Type && <p className="text-red-500 text-sm">{errors.Prodcut_Type.message}</p>}
-              </div>
-
-              <div className="mb-5">
-                <label
-                  htmlFor="categoryName"
-                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
-                >
-                  Is Top Rated
-                </label>
-                <select
-                  {...register("Rated", { required: "Top Rated is required" })}
-                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
-                  <option value="">Nothing Selected</option>
-                  <option value="">Yes</option>
-                  <option value="">No</option>
-
-                </select>
-                {errors.Rated && <p className="text-red-500 text-sm">{errors.Rated.message}</p>}
-              </div>
-
-              <div className="mb-5">
-                <label
-                  htmlFor="categoryName"
-                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
-                >
-                  Actual Price
-                </label>
-                <input
-                  type="text"
-                  {...register("Actual_Price", { required: " Actual Price is required" })}
-                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
-                  placeholder='Actual Price'
-                />
-                {errors.Actual_Price && <p className="text-red-500 text-sm">{errors.Actual_Price.message}</p>}
-              </div>
-
-              <div className="mb-5">
-                <label
-                  htmlFor="categoryName"
-                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
-                >
-                  Total In Stocks
-                </label>
-                <input
-                  type="text"
-                  {...register("Stocks", { required: "Stocks is required" })}
-                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
-                  placeholder='Total In Stocks'
-                />
-                {errors.Stocks && <p className="text-red-500 text-sm">{errors.Stocks.message}</p>}
-              </div>
-
-
-
-            </div>
-
-            {/* for right */}
-            <div className="right-items">
               <div className="mb-5">
                 <label
                   htmlFor="categoryName"
@@ -279,18 +281,22 @@ export default function ProductDetails() {
                   Select Parent Category
                 </label>
                 <select
-                  {...register("Parent_Category", { required: "Parent Category is required" })}
+                  {...register("parent_category", { required: "Parent Category is required" })}
+                  name='parent_category'
+                  onChange={ selectCategories }
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
 
-                  <option value="mobile">Mobile Phones</option>
-                  <option value="laptop">Laptops</option>
-
-                  <option value="men">Men's Wear</option>
-                  <option value="women">Women's Wear</option>
+                  {
+                    categories.map((v,i) => {
+                      return(
+                        <option key={i} value={v._id}>{v.name}</option>
+                      )
+                    })
+                  }
 
                 </select>
-                {errors.Parent_Category && <p className="text-red-500 text-sm">{errors.Parent_Category.message}</p>}
+                {errors.parent_category && <p className="text-red-500 text-sm">{errors.parent_category.message}</p>}
               </div>
 
               <div className="mb-5">
@@ -301,18 +307,133 @@ export default function ProductDetails() {
                   Select Sub Sub Category
                 </label>
                 <select
-                  {...register("Sub_Sub_Category", { required: "Sub Sub Category is required" })}
+                  {...register("sub_sub_category_ids", { required: "Sub Sub Category is required" })}
+                  name='sub_sub_category_ids'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
 
-                  <option value="mobile">Mobile Phones</option>
-                  <option value="laptop">Laptops</option>
-
-                  <option value="men">Men's Wear</option>
-                  <option value="women">Women's Wear</option>
+                  {
+                    subSubCategories.map((v,i) => {
+                      return(
+                        <option key={i} value={v._id}>{v.name}</option>
+                      )
+                    })
+                  }
 
                 </select>
-                {errors.Sub_Sub_Category && <p className="text-red-500 text-sm">{errors.Sub_Sub_Category.message}</p>}
+                {errors.sub_sub_category_ids && <p className="text-red-500 text-sm">{errors.sub_sub_category_ids.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="is_featured"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Is Featured
+                </label>
+                <select
+                  {...register("is_featured", { required: "Is Featured is required" })}
+                  name='is_featured'
+                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
+                  <option value="">Nothing Selected</option>
+                  <option value="1">Yes</option>
+                  <option value="2">No</option>
+
+                </select>
+                {errors.is_featured && <p className="text-red-500 text-sm">{errors.is_featured.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="is_onsale"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Is OnSale
+                </label>
+                <select
+                  {...register("is_onsale", { required: "Is Onsale is required" })}
+                  name='is_onsale'
+                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
+                  <option value="">Nothing Selected</option>
+                  <option value="1">Yes</option>
+                  <option value="2">No</option>
+
+                </select>
+                {errors.is_onsale && <p className="text-red-500 text-sm">{errors.is_onsale.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="is_top_rated"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Is Top Rated
+                </label>
+                <select
+                  {...register("is_top_rated", { required: "Is Top Rated is required" })}
+                  name='is_top_rated'
+                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
+                  <option value="">Nothing Selected</option>
+                  <option value="1">Yes</option>
+                  <option value="2">No</option>
+
+                </select>
+                {errors.is_top_rated && <p className="text-red-500 text-sm">{errors.is_top_rated.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="actual_price"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Actual Price
+                </label>
+                <input
+                  type="text"
+                  name='actual_price'
+                  {...register("actual_price", { required: " Actual Price is required" })}
+                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
+                  placeholder='Actual Price'
+                />
+                {errors.actual_price && <p className="text-red-500 text-sm">{errors.actual_price.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="estimate_delivery_days"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Estimate Delivery Days
+                </label>
+                <input
+                  type="text"
+                  name='estimate_delivery_days'
+                  {...register("estimate_delivery_days", { required: " Estimate Delivery Days is required" })}
+                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
+                  placeholder='Estimate Delivery Days'
+                />
+                {errors.estimate_delivery_days && <p className="text-red-500 text-sm">{errors.estimate_delivery_days.message}</p>}
+              </div>
+            </div>
+
+            {/* for right */}
+            <div className="right-items">
+
+              <div className="mb-5">
+                <label
+                  htmlFor="code"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Product Code
+                </label>
+                <input
+                  type="text"
+                  name='code'
+                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
+                  placeholder='Product Code'
+                  {...register("code", { required: "Product Code is required" })}
+                />
+                {errors.code && <p className="text-red-500 text-sm">{errors.code.message}</p>}
               </div>
 
               <div className="mb-5">
@@ -323,59 +444,125 @@ export default function ProductDetails() {
                   Select Color
                 </label>
                 <select
-                  {...register("Color", { required: "Color is required" })}
+                  {...register("color_ids", { required: "Color is required" })}
+                  name='color_ids'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
 
-                  <option value="">Red</option>
-                  <option value="">Blue</option>
-
-                  <option value="">Green</option>
-                  <option value="">Gray</option>
+                  {
+                    colors.map((v,i) => {
+                      return(
+                        <option key={i} value={v._id}>{v.name}</option>
+                      )
+                    })
+                  }
 
                 </select>
-                {errors.Color && <p className="text-red-500 text-sm">{errors.Color.message}</p>}
+                {errors.color_ids && <p className="text-red-500 text-sm">{errors.color_ids.message}</p>}
               </div>
 
               <div className="mb-5">
                 <label
                   htmlFor="categoryName"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Select Sub Category
+                </label>
+                <select
+                  {...register("sub_category", { required: "Sub Category is required" })}
+                  name='sub_category'
+                  onChange={ selectSubCategories }
+                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
+                  <option value="">Select Sub Category</option>
+                  {
+                    subCategories.map((v,i) => {
+                      return(
+                        <option key={i} value={v._id}>{v.name}</option>
+                      )
+                    })
+                  }
+
+                </select>
+                {errors.sub_category && <p className="text-red-500 text-sm">{errors.sub_category.message}</p>}
+
+              </div>
+          
+              <div className="mb-5">
+                <label
+                  htmlFor="is_best_selling"
                   className="block  text-md font-medium text-gray-900 text-[#76838f]"
                 >
                   Is Best Selling
                 </label>
                 <select
-                  {...register("Selling", { required: " Best Selling is required" })}
+                  {...register("is_best_selling", { required: " Best Selling is required" })}
+                  name='is_best_selling'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="">Yes</option>
-                  <option value="">No</option>
+                  <option value="1">Yes</option>
+                  <option value="2">No</option>
 
                 </select>
-                {errors.Selling && <p className="text-red-500 text-sm">{errors.Selling.message}</p>}
+                {errors.is_best_selling && <p className="text-red-500 text-sm">{errors.is_best_selling.message}</p>}
               </div>
 
               <div className="mb-5">
                 <label
-                  htmlFor="categoryName"
+                  htmlFor="is_new_arrival"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Is New Arrival
+                </label>
+                <select
+                  {...register("is_new_arrival", { required: "Is New Arrival is required" })}
+                  name='is_new_arrival'
+                  className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
+                  <option value="">Nothing Selected</option>
+                  <option value="1">Yes</option>
+                  <option value="2">No</option>
+
+                </select>
+                {errors.is_new_arrival && <p className="text-red-500 text-sm">{errors.is_new_arrival.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="is_upsell"
                   className="block  text-md font-medium text-gray-900 text-[#76838f]"
                 >
                   Is Upsell
                 </label>
                 <select
-                  {...register("Upsell", { required: "Upsell is required" })}
+                  {...register("is_upsell", { required: "Is Upsell is required" })}
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="">Yes</option>
-                  <option value="">No</option>
+                  <option value="1">Yes</option>
+                  <option value="2">No</option>
 
                 </select>
-                {errors.Upsell && <p className="text-red-500 text-sm">{errors.Upsell.message}</p>}
+                {errors.is_upsell && <p className="text-red-500 text-sm">{errors.is_upsell.message}</p>}
               </div>
 
               <div className="mb-5">
                 <label
-                  htmlFor="categoryName"
+                  htmlFor="quantity"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Total In Stocks
+                </label>
+                <input
+                  type="text"
+                  {...register("quantity", { required: "Stocks is required" })}
+                  name='quantity'
+                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
+                  placeholder='Total In Stocks'
+                />
+                {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity.message}</p>}
+              </div>
+
+              <div className="mb-5">
+                <label
+                  htmlFor="sale_price"
                   className="block  text-md font-medium text-gray-900 text-[#76838f]"
                 >
                   Sale Price
@@ -384,31 +571,60 @@ export default function ProductDetails() {
                   type="text"
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder=' Sale Price'
-                  {...register("Sale_Price", { required: "Sale Price is required" })}
+                  name='sale_price'
+                  {...register("sale_price", { required: "Sale Price is required" })}
                 />
-                {errors.Sale_Price && <p className="text-red-500 text-sm">{errors.Sale_Price.message}</p>}
+                {errors.sale_price && <p className="text-red-500 text-sm">{errors.sale_price.message}</p>}
               </div>
-
+              
+              <div className="mb-5">
+                <label
+                  htmlFor="dimension"
+                  className="block  text-md font-medium text-gray-900 text-[#76838f]"
+                >
+                  Dimension
+                </label>
+                <input
+                  type="text"
+                  className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
+                  placeholder=' Dimension'
+                  name='dimension'
+                  {...register("dimension", { required: "Dimension is required" })}
+                />
+                {errors.dimension && <p className="text-red-500 text-sm">{errors.dimension.message}</p>}
+              </div>
 
               <div className="mb-5">
                 <label
-                  htmlFor="categoryName"
+                  htmlFor="order"
                   className="block  text-md font-medium text-gray-900 text-[#76838f]"
                 >
                   Order
                 </label>
                 <input
                   type="text"
+                  name='order'
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Order'
-                  {...register("Order", { required: " Order is required" })}
+                  {...register("order", { required: " Order is required" })}
                 />
-                {errors.Order && <p className="text-red-500 text-sm">{errors.Order.message}</p>}
+                {errors.order && <p className="text-red-500 text-sm">{errors.order.message}</p>}
               </div>
-
-
             </div>
           </div>
+
+          <div className='py-[40px]'>
+            <label
+              htmlFor="short_description"
+              className="block  text-md font-medium text-gray-900 text-[#76838f]"
+            >
+              Short Description
+            </label>
+            <textarea name='short_description' className='text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3 h-[200px]' {...register("short_description", { required: "Short Description is required" })}></textarea>
+          </div>
+          {errors.short_description && (
+            <p className="text-red-500 text-sm">{errors.short_description.message}</p>
+          )}
 
           <div className='py-[40px]'>
             <label
@@ -417,7 +633,7 @@ export default function ProductDetails() {
             >
               Description
             </label>
-            <ReactQuill theme="snow" value={value} onChange={setValue} className='h-[200px]' {...register("description", { required: "Description is required" })} />
+            <ReactQuill theme="snow" value={value} onChange={setValue} className='h-[200px]'  />
 
           </div>
           {errors.description && (

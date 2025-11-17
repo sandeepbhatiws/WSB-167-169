@@ -1,3 +1,5 @@
+const colorModal = require("../../models/color");
+const materialModal = require("../../models/material");
 const productModal = require("../../models/product");
 const subSubCategoryModal = require("../../models/subSubCategory");
 const env = require('dotenv').config();
@@ -15,6 +17,150 @@ const generateUniqueSlug = async (Model, baseSlug) => {
 
   return slug;
 };
+
+exports.viewMaterials = async (request, response) => {
+    try {
+
+        const addCondition = [
+            {
+                deleted_at : null,
+            }
+        ];
+
+        const orCondition = [{
+            status : true,
+        }];
+
+        if(request.body){
+            if(request.body.id != undefined){
+                if(request.body.id != ''){
+                    orCondition.push({ _id : request.body.id })
+                }
+            }
+        }
+
+        if(addCondition.length > 0){
+            var filter = { $and : addCondition }
+        } else {
+            var filter = {}
+        }
+
+        if(orCondition.length > 0){
+            filter.$or = orCondition;
+        }
+
+        await materialModal.find(filter).select('_id name')
+        .sort({ _id : 'desc'})
+        .then((result) => {
+            if(result.length > 0){
+                const data = {
+                    _status: true,
+                    _message: 'Record found succussfully !!',
+                    _data: result
+                }
+                response.send(data);
+            } else {
+                const data = {
+                    _status: false,
+                    _message: 'No Record found !!',
+                    _data: result
+                }
+                response.send(data);
+            }
+            
+        })
+        .catch((error) => {
+            const data = {
+                _status: false,
+                _message: 'Something went wrong !!',
+                _error: error,
+                _data: []
+            }
+            response.send(data);
+        });
+
+    } catch (error) {
+        const data = {
+            _status: false,
+            _message: 'Something went wrong !!',
+            _error: error,
+            _data: []
+        }
+        response.send(data);
+    }
+}
+
+exports.viewColors = async (request, response) => {
+    try {
+
+        const addCondition = [
+            {
+                deleted_at : null,
+            }
+        ];
+
+        const orCondition = [{
+            status : true,
+        }];
+
+        if(request.body){
+            if(request.body.id != undefined){
+                if(request.body.id != ''){
+                    orCondition.push({ _id : request.body.id })
+                }
+            }
+        }
+
+        if(addCondition.length > 0){
+            var filter = { $and : addCondition }
+        } else {
+            var filter = {}
+        }
+
+        if(orCondition.length > 0){
+            filter.$or = orCondition;
+        }
+
+        await colorModal.find(filter).select('_id name')
+        .sort({ _id : 'desc'})
+        .then((result) => {
+            if(result.length > 0){
+                const data = {
+                    _status: true,
+                    _message: 'Record found succussfully !!',
+                    _data: result
+                }
+                response.send(data);
+            } else {
+                const data = {
+                    _status: false,
+                    _message: 'No Record found !!',
+                    _data: result
+                }
+                response.send(data);
+            }
+            
+        })
+        .catch((error) => {
+            const data = {
+                _status: false,
+                _message: 'Something went wrong !!',
+                _error: error,
+                _data: []
+            }
+            response.send(data);
+        });
+
+    } catch (error) {
+        const data = {
+            _status: false,
+            _message: 'Something went wrong !!',
+            _error: error,
+            _data: []
+        }
+        response.send(data);
+    }
+}
 
 exports.viewSubSubCategory = async (request, response) => {
     try {
@@ -59,7 +205,7 @@ exports.viewSubSubCategory = async (request, response) => {
             filter.$or = orCondition;
         }
 
-        await subSubCategoryModal.find(filter).select('_id name parent_category')
+        await subSubCategoryModal.find(filter).select('_id name parent_category sub_category')
         .sort({ _id : 'desc'})
         .then((result) => {
             if(result.length > 0){
@@ -102,14 +248,18 @@ exports.viewSubSubCategory = async (request, response) => {
 
 exports.create = async(request, response) => {
 
-    var data = request.body;
+    if(request.body){
+        var data = request.body;
 
-    if(request.body.name){
-        var slug = slugify(request.body.name, {
-            lower: true,
-            strict: true,
-        });
-        data.slug = await generateUniqueSlug(productModal, slug);
+        if(request.body.name){
+            var slug = slugify(request.body.name, {
+                lower: true,
+                strict: true,
+            });
+            data.slug = await generateUniqueSlug(productModal, slug);
+        }
+    } else {
+        var data = {};
     }
 
     // if(request.file){
@@ -129,10 +279,14 @@ exports.create = async(request, response) => {
             })
             .catch((error) => {
 
-                var errors = [];
+                // var errors = [];
+                // for (var i in error.errors) {
+                //     errors.push(error.errors[i].message);
+                // }
 
+                var errors = {};
                 for (var i in error.errors) {
-                    errors.push(error.errors[i].message);
+                    errors[i] = error.errors[i].message;
                 }
 
                 const data = {
@@ -221,6 +375,9 @@ exports.view = async (request, response) => {
         // .select('name parent_category image status order')
         .populate('parent_category', 'name')
         .populate('sub_category', 'name')
+        .populate('material_ids', 'name')
+        .populate('color_ids', 'name')
+        .populate('sub_sub_category_ids', 'name')
         .skip(skip).limit(limit).sort({ _id : 'desc'})
             .then((result) => {
                 if(result.length > 0){
