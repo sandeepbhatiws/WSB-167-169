@@ -262,9 +262,28 @@ exports.create = async(request, response) => {
         var data = {};
     }
 
-    // if(request.file){
-    //     data.image = request.file.filename;
-    // }
+    if(data.sub_sub_categories_ids != ''){
+        data.sub_sub_category_ids = data.sub_sub_category_ids.split(',');
+    }
+
+    if(request.files != undefined){
+            
+        if(request.files.image != undefined){
+            if(request.files.image){
+                data.image = request.files.image[0].filename;
+            }
+        }
+
+        if(request.files.images != undefined){
+            if(request.files.images){
+                var images = [];
+                request.files.images.forEach((v) => {
+                    images.push(v.filename)
+                })
+                data.images = images;
+            }
+        }
+    }
 
     try {
 
@@ -484,11 +503,33 @@ exports.update = async(request, response) => {
 
         data.updated_at = Date.now();
 
-        // if(request.file != undefined){
-        //     if(request.file){
-        //         data.image = request.file.filename;
-        //     }
-        // }
+        if(data.sub_sub_categories_ids != ''){
+            data.sub_sub_category_ids = data.sub_sub_category_ids.split(',');
+        }
+
+        console.log(data);
+
+        if(request.files != undefined){
+            
+            if(request.files.image != undefined){
+                console.log(request.files)
+                if(request.files.image){
+                    data.image = request.files.image[0].filename;
+                }
+            }
+
+            if(request.files.images != undefined){
+                console.log(request.files.images)
+                if(request.files.images){
+                    var images = [];
+                    request.files.images.forEach((v) => {
+                        images.push(v.filename)
+                    })
+                    data.images = images;
+                }
+            }
+        }
+
 
         var saveData = await productModal.updateOne({
             _id : request.params.id
@@ -515,6 +556,8 @@ exports.update = async(request, response) => {
             })
             .catch((error) => {
 
+                console.log(error);
+
                 var errors = [];
 
                 for (var i in error.errors) {
@@ -531,6 +574,7 @@ exports.update = async(request, response) => {
             });
 
     } catch (error) {
+        console.log(error);
         const data = {
             _status: false,
             _message: 'Something went wrong !!',

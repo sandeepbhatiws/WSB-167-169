@@ -14,16 +14,17 @@ module.exports = server => {
             cb(null, 'uploads/products')
         },
         filename: function (req, file, cb) {
+            const random = Math.floor(100 + Math.random() * 900) % 100;
             extension = path.extname(file.originalname);
 
-            const uniqueSuffix = Date.now()+extension;
+            const uniqueSuffix = Date.now()+random+extension;
             cb(null, file.fieldname + '-' + uniqueSuffix)
         }
     })
 
     const uploads = multer({ storage: storage })
     const singleImage = uploads.single('image');
-    const imageUploads = upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 8 }])
+    const imageUploads = uploads.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 8 }])
 
     router.post('/view-materials', upload.none(), viewMaterials);
     

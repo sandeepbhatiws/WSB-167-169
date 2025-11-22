@@ -24,6 +24,9 @@ server.use('/uploads/default', express.static('uploads/default'));
 server.use('/uploads/categories', express.static('uploads/categories'));
 server.use('/uploads/products', express.static('uploads/products'));
 
+// Website API
+require('./src/routes/website/user.routes.js')(server);
+
 // Admin API URls
 require('./src/routes/admin/default.routes.js')(server);
 require('./src/routes/admin/color.routes.js')(server);

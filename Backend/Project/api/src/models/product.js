@@ -14,14 +14,14 @@ const productSchema = new mongoose.Schema({
         type : String,
         default : ''
     },
-    // image : {
-    //     type : String,
-    //     default : ''
-    // },
-    // images : {
-    //     type : Array,
-    //     default : []
-    // },
+    image : {
+        type : String,
+        default : ''
+    },
+    images : {
+        type : Array,
+        default : []
+    },
     actual_price : {
         type : Number,
         default : 0,

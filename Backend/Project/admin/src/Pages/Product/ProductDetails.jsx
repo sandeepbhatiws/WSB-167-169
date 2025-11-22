@@ -16,96 +16,140 @@ export default function ProductDetails() {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [subSubCategories, setSubSubCategories] = useState([]);
-  const [parent_category_id, set_parent_category_id] = useState('');
-  const [value, setValue] = useState('');
+  const [value, setDescriptionValue] = useState('');
   const navigate = useNavigate();
+  const params = useParams();
+  const [updatedId, setUpdatedId] = useState('');
+  const [imageURL, setImageUrl] = useState('');
+  const [productDetails, setProductDetails] = useState('');
+
+  const [material_id, set_material_id] = useState('');
+  const [color_id, set_color_id] = useState('');
+  const [parent_category_id, set_parent_category_id] = useState('');
+  const [sub_category_id, set_sub_category_id] = useState('');
+  const [sub_sub_category_id, set_sub_sub_category_id] = useState([]);
 
   useEffect(() => {
     axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-materials`)
-    .then((result) => {
-      if(result.data._status == true){
-        setMaterials(result.data._data);
-      }
-    })
-    .catch(() => {
-      toast.error('Something went wrong');
-    })
+      .then((result) => {
+        if (result.data._status == true) {
+          setMaterials(result.data._data);
+        }
+      })
+      .catch(() => {
+        toast.error('Something went wrong');
+      })
 
     axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-colors`)
-    .then((result) => {
-      if(result.data._status == true){
-        setColors(result.data._data);
-      }
-    })
-    .catch(() => {
-      toast.error('Something went wrong');
-    })
+      .then((result) => {
+        if (result.data._status == true) {
+          setColors(result.data._data);
+        }
+      })
+      .catch(() => {
+        toast.error('Something went wrong');
+      })
   }, []);
 
+  // Parent Category
   useEffect(() => {
-    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-parent-category`)
-    .then((result) => {
-      if(result.data._status == true){
-        setCategories(result.data._data);
-      }
+    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-parent-category`, {
+      id: parent_category_id
     })
-    .catch(() => {
-      toast.error('Something went wrong');
-    })
-  }, []);
+      .then((result) => {
+        if (result.data._status == true) {
+          setCategories(result.data._data);
+        }
+      })
+      .catch(() => {
+        toast.error('Something went wrong');
+      })
+  }, [parent_category_id]);
+
+  // Sub Category
+  useEffect(() => {
+    if (parent_category_id != '') {
+      axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-sub-category`, {
+        id: sub_category_id,
+        parent_category: parent_category_id
+      })
+        .then((result) => {
+          if (result.data._status == true) {
+            setSubCategories(result.data._data);
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong');
+        })
+    }
+  }, [parent_category_id]);
+
+  // Sub Sub Category
+  useEffect(() => {
+    if (parent_category_id != '' && sub_category_id != '') {
+      axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-sub-sub-category`, {
+        id: sub_sub_category_id,
+        parent_category: parent_category_id,
+        sub_category: sub_category_id
+      })
+        .then((result) => {
+          if (result.data._status == true) {
+            setSubSubCategories(result.data._data);
+          } else {
+            setSubSubCategories([]);
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong');
+        })
+    }
+  }, [parent_category_id, sub_category_id]);
+
 
   const selectCategories = (event) => {
     set_parent_category_id(event.target.value);
-
-    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-sub-category`, {
-      parent_category : event.target.value
-    })
-    .then((result) => {
-      if(result.data._status == true){
-        setSubCategories(result.data._data);
-      } else {
-        setSubCategories([]);
-      }
-    })
-    .catch(() => {
-      toast.error('Something went wrong');
-    })
   }
 
   const selectSubCategories = (event) => {
-    axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/view-sub-sub-category`,{
-      parent_category : parent_category_id,
-      sub_category : event.target.value
-    })
-    .then((result) => {
-      if(result.data._status == true){
-        setSubSubCategories(result.data._data);
-      } else {
-        setSubSubCategories([]);
-      }
-    })
-    .catch(() => {
-      toast.error('Something went wrong');
-    })
+    set_sub_category_id(event.target.value)
   }
 
   const {
     register,
     handleSubmit,
+    reset,
+    setValue,
     formState: { errors }
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log("Form Data:", data);
-
     data.description = value;
 
-    // Add Product
-      axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/create`, data)
+    const formData = new FormData();
+
+    // Append all form fields
+    Object.keys(data).forEach((key) => {
+      if (key === "image" && data.image && data.image[0]) {
+        formData.append("image", data.image[0]);
+      } else if (key === "images" && data.images && data.images[0]) {
+        // formData.append("images", data.images[0]);
+
+        // Multiple images
+        for (let i = 0; i < data.images.length; i++) {
+          formData.append("images", data.images[i]);
+        }
+      } else if (key !== "image" && key !== "images") {
+        formData.append(key, data[key]);
+      }
+    });
+
+    if (!updatedId) {
+      // Add Product
+      axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/create`, formData)
         .then((result) => {
           if (result.data._status == true) {
             toast.success(result.data._message);
-            // event.target.reset();
+            reset();
             navigate('/product/view');
           } else {
             toast.error(result.data._message);
@@ -114,12 +158,23 @@ export default function ProductDetails() {
         .catch(() => {
           toast.error('Something went wrong !');
         })
-    // alert("Product Created Successfully!");
+    } else {
+      // Update Product
+      axios.put(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/update/${updatedId}`, formData)
+        .then((result) => {
+          if (result.data._status == true) {
+            toast.success(result.data._message);
+            reset();
+            navigate('/product/view');
+          } else {
+            toast.error(result.data._message);
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong !');
+        })
+    }
   };
-
-
-
-
 
   useEffect(() => {
     $(".dropify").dropify({
@@ -132,18 +187,67 @@ export default function ProductDetails() {
     });
   }, []);
 
-  
-  // update work
-  const [updateIdState, setUpdateIdState] = useState(false)
-  let updateId = useParams().id
+  //Dropify
   useEffect(() => {
-    if (updateId == undefined) {
-      setUpdateIdState(false)
+    const dropifyElement = $("#image");
+
+    if (dropifyElement.data("dropify")) {
+      dropifyElement.data("dropify").destroy();
+      dropifyElement.removeData("dropify");
     }
-    else {
-      setUpdateIdState(true)
+
+    // **Force Update Dropify Input**
+    dropifyElement.replaceWith(
+      `<input type="file" accept="image/*" name="image" id="image"
+          class="dropify" data-height="250" data-default-file="${imageURL}"/>`
+    );
+
+    // **Reinitialize Dropify**
+    $("#image").dropify();
+
+  }, [imageURL]); // ✅ Runs when `defaultImage` updates
+
+
+  // update work
+  useEffect(() => {
+    if (params.id != '' && params.id != undefined) {
+      setUpdatedId(params.id);
+
+      axios.post(`${import.meta.env.VITE_BASE_URL}/${import.meta.env.VITE_PRODUCT_API}/details/${params.id}`)
+        .then((result) => {
+          if (result.data._status == true) {
+
+            if (result.data._data) {
+              Object.entries(result.data._data).forEach(([key, value]) => {
+                if(key != 'image' && key != 'images' && key != 'deleted_at'){
+                    setValue(key, value);
+                }
+                
+              });
+            }
+            // ...register(result.data._data)
+            setProductDetails(result.data._data)
+            set_material_id(result.data._data.material_ids[0])
+            set_color_id(result.data._data.color_ids[0])
+            set_parent_category_id(result.data._data.parent_category)
+            setDescriptionValue(result.data._data.description);
+            set_sub_category_id(result.data._data.sub_category)
+            set_sub_sub_category_id(result.data._data.sub_sub_category_ids)
+            if (result.data._data.image != '') {
+              setImageUrl(`${result.data._image_path}${result.data._data.image}`)
+            }
+          } else {
+            setProductDetails('');
+          }
+        })
+        .catch(() => {
+          toast.error('Something went wrong !!');
+        })
+
+    } else {
+      setUpdatedId('')
     }
-  }, [updateId])
+  }, [params])
 
 
   return (
@@ -165,15 +269,15 @@ export default function ProductDetails() {
           <li aria-current="page">
             <div className="flex items-center">
               /
-              <span className="ms-1 text-md font-medium text-gray-500 md:ms-2">{updateIdState ? "Update" : "Add"}</span>
+              <span className="ms-1 text-md font-medium text-gray-500 md:ms-2">{updatedId ? "Update" : "Add"}</span>
             </div>
           </li>
         </ol>
       </nav>
 
-      <div className='w-full px-6 py-6  '>
+      <div className='w-full px-6 py-6'>
 
-        <form onSubmit={handleSubmit(onSubmit)} autoComplete='off'>
+        <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' enctype = 'multipart/form-data'>
           <div className="grid grid-cols-3 gap-[10px] ">
             {/* for left */}
             <div className="for-images">
@@ -185,14 +289,28 @@ export default function ProductDetails() {
                 >
                   Product Image
                 </label>
-                <input
-                  type="file"
-                  name='image'
-                  id="image"
-                  className="dropify"
-                  data-height="160"
-                  {...register("image", { required: "Product Image is required" })}
-                />
+                {
+                  updatedId
+                    ?
+                    <input
+                      type="file"
+                      name='image'
+                      id="image"
+                      className="dropify"
+                      data-height="160"
+                      {...register("image", { required: false })}
+                    />
+                    :
+                    <input
+                      type="file"
+                      name='image'
+                      id="image"
+                      className="dropify"
+                      data-height="160"
+                      {...register("image", { required: "Product Image is required" })}
+                    />
+                }
+
                 {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
               </div>
 
@@ -218,14 +336,31 @@ export default function ProductDetails() {
                 >
                   Gallery Image
                 </label>
-                <input
-                  type="file"
-                  id="images"
-                  name='images'
-                  className="dropify"
-                  data-height="160"
-                  {...register("images", { required: "Gallery Image is required" })}
-                />
+                {
+                  updatedId
+                    ?
+                    <input
+                      type="file"
+                      id="images"
+                      name='images[]'
+                      className="dropify"
+                      data-height="160"
+                      multiple="multiple"
+                      {...register("images", { required: false })}
+                    />
+                    :
+                    <input
+                      type="file"
+                      id="images"
+                      name='images[]'
+                      className="dropify"
+                      data-height="160"
+                      multiple="multiple"
+                      {...register("images", { required: "Gallery Image is required" })}
+                    />
+                }
+
+
                 {errors.images && <p className="text-red-500 text-sm">{errors.images.message}</p>}
               </div>
             </div>
@@ -243,6 +378,7 @@ export default function ProductDetails() {
                 <input
                   type="text"
                   name='name'
+                  defaultValue={productDetails.name}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Product Name'
                   {...register("name", { required: "Product Name is required" })}
@@ -263,9 +399,9 @@ export default function ProductDetails() {
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
                   {
-                    materials.map((v,i) => {
-                      return(
-                        <option key={i} value={v._id}>{v.name}</option>
+                    materials.map((v, i) => {
+                      return (
+                        <option key={i} value={v._id} selected={material_id == v._id ? 'selected' : ''} >{v.name}</option>
                       )
                     })
                   }
@@ -283,14 +419,14 @@ export default function ProductDetails() {
                 <select
                   {...register("parent_category", { required: "Parent Category is required" })}
                   name='parent_category'
-                  onChange={ selectCategories }
+                  onChange={selectCategories}
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
 
                   {
-                    categories.map((v,i) => {
-                      return(
-                        <option key={i} value={v._id}>{v.name}</option>
+                    categories.map((v, i) => {
+                      return (
+                        <option key={i} value={v._id} selected={productDetails.parent_category == v._id ? 'selected' : ''}>{v.name}</option>
                       )
                     })
                   }
@@ -307,14 +443,16 @@ export default function ProductDetails() {
                   Select Sub Sub Category
                 </label>
                 <select
-                  {...register("sub_sub_category_ids", { required: "Sub Sub Category is required" })}
-                  name='sub_sub_category_ids'
+                  {...register("sub_sub_category_ids[]", { required: "Sub Sub Category is required" })}
+                  name='sub_sub_category_ids[]'
+                  multiple="multiple"
+                  value={sub_sub_category_id}
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
-                  <option value="">Nothing Selected</option>
+                  {/* <option value="">Nothing Selected</option> */}
 
                   {
-                    subSubCategories.map((v,i) => {
-                      return(
+                    subSubCategories.map((v, i) => {
+                      return (
                         <option key={i} value={v._id}>{v.name}</option>
                       )
                     })
@@ -336,8 +474,8 @@ export default function ProductDetails() {
                   name='is_featured'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="1">Yes</option>
-                  <option value="2">No</option>
+                  <option value="1" selected={productDetails.is_featured == 1 ? 'selected' : ''}>Yes</option>
+                  <option value="2" selected={productDetails.is_featured == 2 ? 'selected' : ''}>No</option>
 
                 </select>
                 {errors.is_featured && <p className="text-red-500 text-sm">{errors.is_featured.message}</p>}
@@ -355,8 +493,8 @@ export default function ProductDetails() {
                   name='is_onsale'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="1">Yes</option>
-                  <option value="2">No</option>
+                  <option value="1" selected={productDetails.is_onsale == 1 ? 'selected' : ''}>Yes</option>
+                  <option value="2" selected={productDetails.is_onsale == 2 ? 'selected' : ''}>No</option>
 
                 </select>
                 {errors.is_onsale && <p className="text-red-500 text-sm">{errors.is_onsale.message}</p>}
@@ -374,8 +512,8 @@ export default function ProductDetails() {
                   name='is_top_rated'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="1">Yes</option>
-                  <option value="2">No</option>
+                  <option value="1" selected={productDetails.is_top_rated == 1 ? 'selected' : ''}>Yes</option>
+                  <option value="2" selected={productDetails.is_top_rated == 2 ? 'selected' : ''}>No</option>
 
                 </select>
                 {errors.is_top_rated && <p className="text-red-500 text-sm">{errors.is_top_rated.message}</p>}
@@ -391,6 +529,7 @@ export default function ProductDetails() {
                 <input
                   type="text"
                   name='actual_price'
+                  defaultValue={productDetails.actual_price}
                   {...register("actual_price", { required: " Actual Price is required" })}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Actual Price'
@@ -408,6 +547,7 @@ export default function ProductDetails() {
                 <input
                   type="text"
                   name='estimate_delivery_days'
+                  defaultValue={productDetails.estimate_delivery_days}
                   {...register("estimate_delivery_days", { required: " Estimate Delivery Days is required" })}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Estimate Delivery Days'
@@ -429,6 +569,7 @@ export default function ProductDetails() {
                 <input
                   type="text"
                   name='code'
+                  defaultValue={productDetails.code}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Product Code'
                   {...register("code", { required: "Product Code is required" })}
@@ -450,9 +591,9 @@ export default function ProductDetails() {
                   <option value="">Nothing Selected</option>
 
                   {
-                    colors.map((v,i) => {
-                      return(
-                        <option key={i} value={v._id}>{v.name}</option>
+                    colors.map((v, i) => {
+                      return (
+                        <option key={i} value={v._id} selected={color_id == v._id ? 'selected' : ''}>{v.name}</option>
                       )
                     })
                   }
@@ -471,13 +612,13 @@ export default function ProductDetails() {
                 <select
                   {...register("sub_category", { required: "Sub Category is required" })}
                   name='sub_category'
-                  onChange={ selectSubCategories }
+                  onChange={selectSubCategories}
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Select Sub Category</option>
                   {
-                    subCategories.map((v,i) => {
-                      return(
-                        <option key={i} value={v._id}>{v.name}</option>
+                    subCategories.map((v, i) => {
+                      return (
+                        <option key={i} value={v._id} selected={sub_category_id == v._id ? 'selected' : ''}>{v.name}</option>
                       )
                     })
                   }
@@ -486,7 +627,7 @@ export default function ProductDetails() {
                 {errors.sub_category && <p className="text-red-500 text-sm">{errors.sub_category.message}</p>}
 
               </div>
-          
+
               <div className="mb-5">
                 <label
                   htmlFor="is_best_selling"
@@ -499,8 +640,8 @@ export default function ProductDetails() {
                   name='is_best_selling'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="1">Yes</option>
-                  <option value="2">No</option>
+                  <option value="1" selected={productDetails.is_best_selling == 1 ? 'selected' : ''}>Yes</option>
+                  <option value="2" selected={productDetails.is_best_selling == 2 ? 'selected' : ''}>No</option>
 
                 </select>
                 {errors.is_best_selling && <p className="text-red-500 text-sm">{errors.is_best_selling.message}</p>}
@@ -518,8 +659,8 @@ export default function ProductDetails() {
                   name='is_new_arrival'
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="1">Yes</option>
-                  <option value="2">No</option>
+                  <option value="1" selected={productDetails.is_new_arrival == 1 ? 'selected' : ''}>Yes</option>
+                  <option value="2" selected={productDetails.is_new_arrival == 2 ? 'selected' : ''}>No</option>
 
                 </select>
                 {errors.is_new_arrival && <p className="text-red-500 text-sm">{errors.is_new_arrival.message}</p>}
@@ -536,8 +677,8 @@ export default function ProductDetails() {
                   {...register("is_upsell", { required: "Is Upsell is required" })}
                   className="text-[19px] text-[#76838f] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg block w-full py-2.5 px-3">
                   <option value="">Nothing Selected</option>
-                  <option value="1">Yes</option>
-                  <option value="2">No</option>
+                  <option value="1" selected={productDetails.is_upsell == 1 ? 'selected' : ''}>Yes</option>
+                  <option value="2" selected={productDetails.is_upsell == 2 ? 'selected' : ''}>No</option>
 
                 </select>
                 {errors.is_upsell && <p className="text-red-500 text-sm">{errors.is_upsell.message}</p>}
@@ -554,6 +695,7 @@ export default function ProductDetails() {
                   type="text"
                   {...register("quantity", { required: "Stocks is required" })}
                   name='quantity'
+                  defaultValue={productDetails.quantity}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Total In Stocks'
                 />
@@ -572,11 +714,12 @@ export default function ProductDetails() {
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder=' Sale Price'
                   name='sale_price'
+                  defaultValue={productDetails.sale_price}
                   {...register("sale_price", { required: "Sale Price is required" })}
                 />
                 {errors.sale_price && <p className="text-red-500 text-sm">{errors.sale_price.message}</p>}
               </div>
-              
+
               <div className="mb-5">
                 <label
                   htmlFor="dimension"
@@ -586,6 +729,7 @@ export default function ProductDetails() {
                 </label>
                 <input
                   type="text"
+                  defaultValue={productDetails.dimension}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder=' Dimension'
                   name='dimension'
@@ -604,6 +748,7 @@ export default function ProductDetails() {
                 <input
                   type="text"
                   name='order'
+                  defaultValue={productDetails.order}
                   className="text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3"
                   placeholder='Order'
                   {...register("order", { required: " Order is required" })}
@@ -620,7 +765,7 @@ export default function ProductDetails() {
             >
               Short Description
             </label>
-            <textarea name='short_description' className='text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3 h-[200px]' {...register("short_description", { required: "Short Description is required" })}></textarea>
+            <textarea name='short_description' className='text-[19px] border-2 shadow-sm border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5 px-3 h-[200px]' {...register("short_description", { required: "Short Description is required" })} defaultValue={productDetails.short_description}>{productDetails.short_description}</textarea>
           </div>
           {errors.short_description && (
             <p className="text-red-500 text-sm">{errors.short_description.message}</p>
@@ -633,7 +778,7 @@ export default function ProductDetails() {
             >
               Description
             </label>
-            <ReactQuill theme="snow" value={value} onChange={setValue} className='h-[200px]'  />
+            <ReactQuill theme="snow" value={value} onChange={setDescriptionValue} className='h-[200px]' />
 
           </div>
           {errors.description && (
@@ -641,8 +786,8 @@ export default function ProductDetails() {
           )}
 
           <button class=" mt-5 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 ">
-             {updateIdState ? "Update Product " : "Add Product"}
-             </button>
+            {updatedId ? "Update Product " : "Add Product"}
+          </button>
 
         </form>
 
