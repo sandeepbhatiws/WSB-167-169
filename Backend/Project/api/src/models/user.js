@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
                 const data = await this.constructor.findOne({ email: v, deleted_at : null });
                 return !data;
             },
-            message: props => `The specified data is already in use.`
+            message: props => `The specified email is already in use.`
         }
     },
     password : {

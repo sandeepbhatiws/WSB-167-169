@@ -1,11 +1,73 @@
 'use client'
+import axios from 'axios';
+import Cookies from 'js-cookie';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { Col, Container, Form, Row } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState('dashboard');
-    const [selectedTitle, setSelectedTitle] = useState("Mr.");
+    
+
+    const router = useRouter();
+    
+    const logout = () => {
+        Cookies.remove('user_login')
+        router.push('/')
+    }
+
+    const [userProfile , setUserProfile] = useState('')
+    const [userEmail , setUserEmail] = useState('')
+    const [selectedTitle, setSelectedTitle] = useState('');
+    const [updateProfile, setUpdateProfile] = useState(true);
+    const [isLoading, setisLoading] = useState(false);
+
+    useEffect(() => {
+        axios.post(`${ process.env.NEXT_PUBLIC_API_URL }/user/view-profile`, {} , {
+            headers : {
+                Authorization : `Bearer ${ Cookies.get('user_login') }`
+            }
+        })
+        .then((result) => {
+            if(result.data._status == true){
+                setUserProfile(result.data._data);
+                setUserEmail(result.data._data.email);
+                setSelectedTitle(result.data._data.gender)
+            } else {
+                toast.error(result.data._message);
+            }
+        })
+        .catch(() => {
+            toast.error('Something went wrong !');
+        })
+    },[updateProfile]);
+
+    const updateProfileHandling = (event) => {
+        event.preventDefault()
+        setisLoading(true);
+
+        axios.put(`${ process.env.NEXT_PUBLIC_API_URL }/user/update-profile`,event.target , {
+            headers : {
+                Authorization : `Bearer ${ Cookies.get('user_login') }`
+            }
+        })
+        .then((result) => {
+            if(result.data._status == true){
+                toast.success(result.data._message);
+                setUpdateProfile(!updateProfile)
+                setisLoading(false);
+            } else {
+                toast.error(result.data._message);
+                setisLoading(false);
+            }
+        })
+        .catch(() => {
+            toast.error('Something went wrong !');
+            setisLoading(false);
+        })
+    }
 
     return (
         <>
@@ -28,7 +90,6 @@ export default function DashboardPage() {
 
                 <Container>
                     <Row>
-
                         <Col lg={3} className='dashboard_tab_button'>
                             <ul className='nav flex-column dashboard-list'>
                                 <li><a onClick={() => setActiveTab('dashboard')} className={`nav-link ${activeTab === 'dashboard' ? 'active' : ''}`}>My Dashboard</a></li>
@@ -41,7 +102,7 @@ export default function DashboardPage() {
 
                                 <li><a onClick={() => setActiveTab('password')} className={`nav-link ${activeTab === 'password' ? 'active' : ''}`}>Change Password</a></li>
 
-                                <li><Link href="/" className='nav-link'>Logout</Link></li>
+                                <li onClick={ logout }><a className='nav-link'>Logout</a></li>
                             </ul>
                         </Col>
 
@@ -271,30 +332,29 @@ export default function DashboardPage() {
                                     <div className="login">
                                         <div className="account_form login_form_container">
                                             <div className="account_login_form">
-                                                <form id="personal_information" autoComplete="off" noValidate="noValidate" className="bv-form">
-
+                                                <form onSubmit={updateProfileHandling} id="personal_information" autoComplete="off" noValidate="noValidate" className="bv-form">
                                                     <div className="col-xl-12">
                                                         <div className="input-radio">
                                                             <span className="custom-radio">
                                                                 <input
                                                                     type="radio"
-                                                                    value="Mr."
-                                                                    name="title"
-                                                                    checked={selectedTitle === "Mr."}
+                                                                    value="Male"
+                                                                    name="gender"
+                                                                    checked={selectedTitle === "Male"}
                                                                     onChange={(e) => setSelectedTitle(e.target.value)}
                                                                 />
-                                                                Mr.
+                                                                Male
                                                             </span>
 
                                                             <span className="custom-radio">
                                                                 <input
                                                                     type="radio"
-                                                                    value="Mrs."
-                                                                    name="title"
-                                                                    checked={selectedTitle === "Mrs."}
+                                                                    value="Female"
+                                                                    name="gender"
+                                                                    checked={selectedTitle === "Female"}
                                                                     onChange={(e) => setSelectedTitle(e.target.value)}
                                                                 />
-                                                                Mrs.
+                                                                Female
                                                             </span>
                                                         </div>
                                                     </div>
@@ -302,21 +362,21 @@ export default function DashboardPage() {
                                                     <div className="col-xl-12">
                                                         <div className="form-group has-feedback">
                                                             <label htmlFor="name">Name*</label>
-                                                            <input type="text" className="form-control" id="name" name="name" data-bv-field="name" />
+                                                            <input type="text" defaultValue={userProfile.name} className="form-control" id="name" name="name" data-bv-field="name" />
                                                         </div>
                                                     </div>
 
                                                     <div className="col-xl-12">
                                                         <div className="form-group has-feedback">
                                                             <label htmlFor="name">Email*</label>
-                                                            <input type="text" className="form-control" id="email" name="email" placeholdere="sultankhan.wscube@gmail.com" readOnly="readOnly" data-bv-field="email" />
+                                                            <input type="text" value={userProfile.email} className="form-control" id="email" placeholdere="Enter Email" readOnly="readOnly" data-bv-field="email" />
                                                         </div>
                                                     </div>
 
                                                     <div className="col-xl-12">
                                                         <div className="form-group has-feedback">
                                                             <label htmlFor="name">Mobile Number*</label>
-                                                            <input type="text" className="form-control numeric" id="mobile_number" maxLength="15" name="mobile_number" data-bv-field="mobile_number" />
+                                                            <input type="text" defaultValue={userProfile.mobile_number} className="form-control numeric" id="mobile_number" maxLength="15" name="mobile_number" data-bv-field="mobile_number" />
                                                         </div>
                                                     </div>
 
@@ -329,7 +389,21 @@ export default function DashboardPage() {
 
 
                                                     <div className="login_submit">
-                                                        <button type="submit" className="common_btn text-uppercase" title="Update" id="updateInfo">Update</button>
+                                                        <button type="submit" className="common_btn text-uppercase" title="Update" id="updateInfo"
+                                                        disabled={
+                                                            isLoading
+                                                            ?
+                                                            'disabled'
+                                                            :
+                                                            ''
+                                                        }
+                                                        >{
+                                                            isLoading
+                                                            ?
+                                                            'Loading ...'
+                                                            :
+                                                            'Update'
+                                                        }</button>
                                                     </div>
                                                 </form>
                                             </div>
